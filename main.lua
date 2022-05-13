@@ -6,9 +6,15 @@
 
 local bit32 = require("bit")
 local unpack = love.data.unpack
+local random = love.math.random
 local max = math.max
 
 local units_in_block = 8
+
+-- brickT constants
+sumT = {0,8,24}
+greySumT = {-1,56,32,0} -- -1:unused
+greyVariations = {-1, 11, 7 , 5}
 
 function inspect(tbl)
     for i,item in pairs(tbl) do
@@ -29,12 +35,22 @@ function love.conf(t)
 end
 
 function love.draw()
-    local quad
+    local quad, width, height, srcX, sizeOffset
     for x, xtem in ipairs(brickT) do
-        for y, ytem in ipairs(xtem) do
-            if ytem[1] ~= 0 then
+        for y, curBrick in ipairs(xtem) do
+            if curBrick[1] ~= 0 then
+                height = curBrick[3] * 8
+                if curBrick[1] == 7 then
+                    width = curBrick[3] * 8
+                    srcX = 240 + curBrick[2]*curBrick[3]*8
+                    sizeOffset = greySumT[curBrick[3]]
+                else
+                    width = curBrick[2] * 8
+                    srcX = (curBrick[1] - 3) * 48
+                    sizeOffset = sumT[curBrick[3]]
+                end
                 -- todo creating quads has terrible performance
-                quad = love.graphics.newQuad((ytem[1]-3)*64, 0, 8, 8, sprite:getWidth(), sprite:getHeight())
+                quad = love.graphics.newQuad(srcX, sizeOffset, width, height, sprite:getWidth(), sprite:getHeight())
                 love.graphics.draw(sprite, quad, x*8-8, y*8-8)
             end
 
@@ -109,7 +125,12 @@ local function createBrickT(cgSizeInBlocks, sobs)
     for _,sob in ipairs(sobs) do
         curBrick = brickT[floor(sob[1]/2) + 1][floor(sob[2]/2) + 1]
         curBrick[1] = geBrickType(sob[5], sob[6])
-        -- todo: if concrete, set other brickT params
+        if curBrick[1] == 7 then
+            -- concrete; set width and height
+            local concreteSize = sob[4]/2
+            curBrick[2] = math.ceil(random(0, greyVariations[concreteSize])) -- pattern
+            curBrick[3] = concreteSize -- size
+        end
     end
 
     return brickT
@@ -174,7 +195,7 @@ function love.load()
     print("numsobs", numSobs, #sobs)
     inspect(sobs[1])
     brickT = createBrickT(size, sobs)
-    love.window.setMode( size[1]*32,size[2]*32 )
+    love.window.setMode( 1280,size[2]*32, {display=2} )
 
 
     assertHeader(fp, "VENT")
