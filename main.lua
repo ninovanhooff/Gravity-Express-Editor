@@ -6,6 +6,7 @@
 
 local bit32 = require("bit")
 local unpack = love.data.unpack
+local max = math.max
 
 local units_in_block = 8
 
@@ -28,7 +29,17 @@ function love.conf(t)
 end
 
 function love.draw()
+    local quad
+    for x, xtem in ipairs(brickT) do
+        for y, ytem in ipairs(xtem) do
+            if ytem[1] ~= 0 then
+                -- todo creating quads has terrible performance
+                quad = love.graphics.newQuad((ytem[1]-3)*64, 0, 8, 8, sprite:getWidth(), sprite:getHeight())
+                love.graphics.draw(sprite, quad, x*8-8, y*8-8)
+            end
 
+        end
+    end
 end
 
 local function assertHeader(self, name)
@@ -44,7 +55,7 @@ local function readInt(self, amount, bytesPerInt)
         return result
     end
     for i = 1,amount do
-        result[i] = unpack("<i"..bytesPerInt, self:read(bytesPerInt))
+        result[i] = unpack("<I"..bytesPerInt, self:read(bytesPerInt))
     end
     return result
 end
@@ -57,8 +68,61 @@ local function splitByte(byte)
    }
 end
 
+--- parameters in CG units (1 unit = 4px)
+local function geBrickType(cgGfxX, cgGfxY)
+    if cgGfxX< 0 or cgGfxY<0 or cgGfxX > 108 or cgGfxY > 15 then
+        print(cgGfxX, cgGfxY)
+        error("outside brick range")
+    end
+    if cgGfxX < 15 then
+        return 3 -- red a.k.a. brown
+    elseif cgGfxX < 30 then
+        return 4 -- yellow
+    elseif cgGfxX < 45 then
+        return 5 -- blue
+    elseif cgGfxX < 60 then
+        return 6 -- green
+    else
+        return 7 -- concrete
+    end
+end
+
+local function createBrickT(cgSizeInBlocks, sobs)
+    -- cg blocks are 32x32 pixels, eg tiles are 8x8. So, multiply by 4 to get the same dimensions
+    local geSizeX = max(cgSizeInBlocks[1] *4)
+    local geSizeY = max(cgSizeInBlocks[2] *4)
+    local brickT = {}
+    local floor = math.floor
+
+    -- initialize empty brickT
+    for x = 1, geSizeX do
+        brickT[x] = {}
+        for y = 1, geSizeY do
+            brickT[x][y] = {0,1,1,0,0} -- type,w,h,subx,suby
+        end
+    end
+
+    print("brickT dim", #brickT, #brickT[1])
+
+
+    local curBrick
+    for _,sob in ipairs(sobs) do
+        curBrick = brickT[floor(sob[1]/2) + 1][floor(sob[2]/2) + 1]
+        curBrick[1] = geBrickType(sob[5], sob[6])
+        -- todo: if concrete, set other brickT params
+    end
+
+    return brickT
+end
+
 function love.load()
-    local fp = io.open("nino1.cgl", "rb")
+    brickT = {}
+    sprite = love.graphics.newImage("sprite.png")
+
+
+    --local fp = io.open("nino1.cgl", "rb")
+    local fp = io.open("level01.cgl", "rb")
+
     print("file", fp, type(fp))
 
     -- file header
@@ -73,7 +137,6 @@ function love.load()
     for i,item in ipairs(soin) do
         soin[i] = bit32.band(item, 127) -- ignore most significant bit
     end
-    inspect(soin)
     numSobs = table.sum(soin)
 
     assertHeader(fp, "SOBS")
@@ -91,14 +154,13 @@ function love.load()
             posInBlock = splitByte(tile[1])
             tileDim = splitByte(tile[2])
 
-
             table.insert(sobs, {
                 blockOffX+posInBlock[1],
                 blockOffY+posInBlock[2],
                 tileDim[1],
                 tileDim[2],
-                tile[3],
-                tile[4]
+                tile[4], -- gfx x. In the level, they are swapped
+                tile[3] -- gfx y
             })
         end
         x = x + 1
@@ -111,6 +173,8 @@ function love.load()
 
     print("numsobs", numSobs, #sobs)
     inspect(sobs[1])
+    brickT = createBrickT(size, sobs)
+    love.window.setMode( size[1]*32,size[2]*32 )
 
 
     assertHeader(fp, "VENT")
@@ -119,6 +183,6 @@ function love.load()
     readInt(fp, numFans * 38, 1)
     assertHeader(fp, "MAGN")
 
-    love.event.quit()
+    --love.event.quit()
 
 end
