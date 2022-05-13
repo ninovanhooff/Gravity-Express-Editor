@@ -7,6 +7,8 @@
 local bit32 = require("bit")
 local unpack = love.data.unpack
 
+local units_in_block = 8
+
 function inspect(tbl)
     for i,item in pairs(tbl) do
         print(i,item)
@@ -76,19 +78,39 @@ function love.load()
 
     assertHeader(fp, "SOBS")
     local sobs = {}
-    for i = 1, numSobs do
-        local tile = readInt(fp, 4, 1)
 
-        sobs[i] = {
-            splitByte(tile[1]),
-            splitByte(tile[2]),
-            tile[3],
-            tile[4]
-        }
+    local x,y = 1,1
+    local blockOffX = 0
+    local blockOffY = 0
+    local tile, posInBlock, tileDim
+    for i = 1, #soin do
+        blockOffX = (x-1) * units_in_block
+        blockOffY = (y-1) * units_in_block
+        for _ = 1, soin[i] do
+            tile = readInt(fp, 4, 1)
+            posInBlock = splitByte(tile[1])
+            tileDim = splitByte(tile[2])
+
+
+            table.insert(sobs, {
+                blockOffX+posInBlock[1],
+                blockOffY+posInBlock[2],
+                tileDim[1],
+                tileDim[2],
+                tile[3],
+                tile[4]
+            })
+        end
+        x = x + 1
+        if x > size[1] then
+            -- go to next row
+            x = 1
+            y = y + 1
+        end
     end
 
     print("numsobs", numSobs, #sobs)
-    inspect(sobs[1][2])
+    inspect(sobs[1])
 
 
     assertHeader(fp, "VENT")
