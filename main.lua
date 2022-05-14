@@ -37,32 +37,39 @@ function table.sum(tbl)
 end
 
 function love.draw()
+    --print("Frame-----")
+    local numDraws = 0
     local brickT = brickT
-    local quad, width, height, srcX, sizeOffset
+    local quad, width, height, srcX, sizeOffsetX, sizeOffsetY
     local x,y = 1,1
     while x < levelProps.sizeX do
         y = 1
         while y < levelProps.sizeY do
             curBrick = brickT[x][y]
             if curBrick[1] ~= 0 and curBrick[4] == 0 and curBrick[5] == 0 then
+                --print("Drawing ", curBrick[1])
+                numDraws = numDraws + 1
                 height = curBrick[3] * 8
                 if curBrick[1] == 7 then
                     width = curBrick[3] * 8
                     srcX = 240 + curBrick[2]*curBrick[3]*8
-                    sizeOffset = greySumT[curBrick[3]]
+                    sizeOffsetX = greySumT[curBrick[3]]
+                    sizeOffsetY = greySumT[curBrick[3]]
                 else
                     width = curBrick[2] * 8
-                    srcX = (curBrick[1] - 3) * 48
-                    sizeOffset = sumT[curBrick[3]]
+                    sizeOffsetX = sumT[curBrick[2]]
+                    sizeOffsetY = sumT[curBrick[3]]
+                    srcX = (curBrick[1] - 3) * 48 + sizeOffsetX
                 end
                 --todo creating quads has terrible performance
-                quad = love.graphics.newQuad(srcX, sizeOffset, width, height, sprite:getWidth(), sprite:getHeight())
+                quad = love.graphics.newQuad(srcX, sizeOffsetY, width, height, sprite:getWidth(), sprite:getHeight())
                 love.graphics.draw(sprite, quad, (x-camPos[1])*8, (y-camPos[2])*8)
             end
             y = y + curBrick[3]-curBrick[5]
         end
         x = x + 1
     end
+    --print("---- numDraws", numDraws)
 end
 
 local function assertHeader(self, name)
@@ -143,6 +150,18 @@ local function optimizeEmptySpace()
     end
 end
 
+--- weighted bricksize, where larger bricks are more likely, returns 0-based size
+local function randomBrickSize()
+    local value = random()
+    if value < 0.1 then
+        return 0
+    elseif value < 0.5 then
+        return 1
+    else
+        return 2
+    end
+end
+
 local function fillBrush(forceSize, brush, percentProgress)
     print("START FILL", curX, curY)
     brush = brush or curBrush
@@ -151,8 +170,8 @@ local function fillBrush(forceSize, brush, percentProgress)
         --item = brush[1]
         --printf("brusht",item[1],item[2])
         if brickT[curX+item[1]][curY+item[2]][1]==0 then -- if the first square is empty, double check?
-            local tryWidth = forceSize or ceil(random(0,5)*0.5)--math.randint(0,3)--0...2
-            local tryHeight = forceSize or ceil(random(0,5)*0.5)--math.randint(0,3)
+            local tryWidth = forceSize or randomBrickSize()
+            local tryHeight = forceSize or randomBrickSize()
             print("try", tryWidth, tryHeight)
             local maxW = tryWidth -- zero based!
             local maxH = tryHeight
@@ -318,7 +337,7 @@ function love.load()
     sprite = love.graphics.newImage("sprite.png")
 
 
-    local fp = io.open("nino2.cgl", "rb")
+    --local fp = io.open("nino2.cgl", "rb")
     local fp = io.open("level01.cgl", "rb")
 
     print("file", fp, type(fp))
@@ -374,6 +393,15 @@ function love.load()
     levelProps.sizeX = #brickT
     levelProps.sizeY = #brickT[1]
     condenseBricks()
+
+    for i,item in ipairs(brickT) do
+        for j,jtem in ipairs(item) do
+            if jtem[1] == 3 and jtem[4] == 0 and jtem[5] == 0 then
+                print("-- ", i, j)
+                inspect(jtem)
+            end
+        end
+    end
 
     local displayIdx = 2
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
