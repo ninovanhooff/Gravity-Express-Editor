@@ -11,6 +11,7 @@ local ceil = math.ceil
 local max = math.max
 local renderProgress = print
 local curX, curY = 1,1
+local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
 local levelProps = {}
 
@@ -35,10 +36,6 @@ function table.sum(tbl)
     return sum
 end
 
-function love.conf(t)
-    t.console = true
-end
-
 function love.draw()
     local brickT = brickT
     local quad, width, height, srcX, sizeOffset
@@ -60,7 +57,7 @@ function love.draw()
                 end
                 --todo creating quads has terrible performance
                 quad = love.graphics.newQuad(srcX, sizeOffset, width, height, sprite:getWidth(), sprite:getHeight())
-                love.graphics.draw(sprite, quad, x*8-8, y*8-8)
+                love.graphics.draw(sprite, quad, (x-camPos[1])*8, (y-camPos[2])*8)
             end
             y = y + curBrick[3]-curBrick[5]
         end
@@ -316,11 +313,12 @@ local function createBrickT(cgSizeInBlocks, sobs)
 end
 
 function love.load()
+    love.keyboard.setKeyRepeat( true )
     brickT = {}
     sprite = love.graphics.newImage("sprite.png")
 
 
-    --local fp = io.open("nino2.cgl", "rb")
+    local fp = io.open("nino2.cgl", "rb")
     local fp = io.open("level01.cgl", "rb")
 
     print("file", fp, type(fp))
@@ -377,7 +375,8 @@ function love.load()
     levelProps.sizeY = #brickT[1]
     condenseBricks()
 
-    love.window.setMode( 1280,size[2]*32, {display=2} )
+    local displayIdx = 2
+    love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
 
 
     assertHeader(fp, "VENT")
@@ -388,4 +387,12 @@ function love.load()
 
     --love.event.quit()
 
+end
+
+function love.keypressed(key, _, _)
+    if key == "right" then
+        camPos[1] = camPos[1] + 1
+    elseif key == "down" then
+        camPos[2] = camPos[2] + 1
+    end
 end
