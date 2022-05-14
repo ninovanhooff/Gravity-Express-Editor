@@ -15,6 +15,8 @@ local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
 local levelProps = {}
 
+local fileName = "LEVEL01.CGL"
+
 local units_in_block = 8
 
 -- brickT constants
@@ -337,8 +339,7 @@ function love.load()
     sprite = love.graphics.newImage("sprite.png")
 
 
-    --local fp = io.open("nino2.cgl", "rb")
-    local fp = io.open("level01.cgl", "rb")
+    local fp = io.open(fileName, "rb")
 
     print("file", fp, type(fp))
 
@@ -388,7 +389,6 @@ function love.load()
     end
 
     print("numsobs", numSobs, #sobs)
-    inspect(sobs[2])
     brickT = createBrickT(size, sobs)
     levelProps.sizeX = #brickT
     levelProps.sizeY = #brickT[1]
@@ -407,11 +407,41 @@ function love.load()
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
 
 
-    assertHeader(fp, "VENT")
-    local numFans = readInt(fp, 1, 4)[1]
-    print("numFans", numFans)
-    readInt(fp, numFans * 38, 1)
-    assertHeader(fp, "MAGN")
+    --assertHeader(fp, "VENT")
+    --local numFans = readInt(fp, 1, 4)[1]
+    --print("numFans", numFans)
+    --readInt(fp, numFans * 38, 1)
+    --
+    --assertHeader(fp, "MAGN")
+    --local numMagnets = readInt(fp, 1, 4)[1]
+    --print("numMagnets", numMagnets)
+    --readInt(fp, numMagnets * 38, 1)
+    --
+    --assertHeader(fp, "DIST")
+    --local numRotators = readInt(fp, 1, 4)[1]
+    --print("numRotators", numRotators)
+    --readInt(fp, numRotators * 38, 1)
+    --
+    --assertHeader(fp, "CANO")
+    --local numCannons = readInt(fp, 1, 4)[1]
+    --print("numCannons", numCannons)
+    --readInt(fp, numCannons * 51, 1)
+    --
+    --assertHeader(fp, "PIPE")
+    --local numRods = readInt(fp, 1, 4)[1]
+    --print("numRods", numRods)
+    --readInt(fp, numRods * 38, 1)
+    --
+    --assertHeader(fp, "ONEW")
+    --local numOneWays = readInt(fp, 1, 4)[1]
+    --print("numOneWays", numOneWays)
+    --readInt(fp, numOneWays * 38, 1)
+    --
+    --assertHeader(fp, "BARR")
+    --local numBarriers = readInt(fp, 1, 4)[1]
+    --print("numBarriers", numBarriers)
+    --readInt(fp, numBarriers * 38, 1)
+    
 
     --love.event.quit()
 
