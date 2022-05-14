@@ -7,7 +7,12 @@
 local bit32 = require("bit")
 local unpack = love.data.unpack
 local random = love.math.random
+local ceil = math.ceil
 local max = math.max
+local renderProgress = print
+local curX, curY = 1,1
+local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
+local levelProps = {}
 
 local units_in_block = 8
 
@@ -35,10 +40,14 @@ function love.conf(t)
 end
 
 function love.draw()
+    local brickT = brickT
     local quad, width, height, srcX, sizeOffset
-    for x, xtem in ipairs(brickT) do
-        for y, curBrick in ipairs(xtem) do
-            if curBrick[1] ~= 0 then
+    local x,y = 1,1
+    while x < levelProps.sizeX do
+        y = 1
+        while y < levelProps.sizeY do
+            curBrick = brickT[x][y]
+            if curBrick[1] ~= 0 and curBrick[4] == 0 and curBrick[5] == 0 then
                 height = curBrick[3] * 8
                 if curBrick[1] == 7 then
                     width = curBrick[3] * 8
@@ -49,12 +58,13 @@ function love.draw()
                     srcX = (curBrick[1] - 3) * 48
                     sizeOffset = sumT[curBrick[3]]
                 end
-                -- todo creating quads has terrible performance
+                --todo creating quads has terrible performance
                 quad = love.graphics.newQuad(srcX, sizeOffset, width, height, sprite:getWidth(), sprite:getHeight())
                 love.graphics.draw(sprite, quad, x*8-8, y*8-8)
             end
-
+            y = y + curBrick[3]-curBrick[5]
         end
+        x = x + 1
     end
 end
 
@@ -103,12 +113,153 @@ local function geBrickType(cgGfxX, cgGfxY)
     end
 end
 
+local function brushContains(k, l, brush)
+    --printf("contains?",k,l)
+    for i,item in pairs(brush) do
+        if item[1]==k and item[2]==l then
+            return true
+        end
+    end
+    return false
+end
+
+
+local function optimizeEmptySpace()
+    for i=1,levelProps.sizeX do
+        local lastJ = -1
+        for j=levelProps.sizeY,1,-1 do
+            if brickT[i][j][1]<3 and j>1 then -- empty space
+                if lastJ==-1 then
+                    lastJ = j
+                end
+            else -- always for j==1
+                if lastJ~=-1 then
+                    for k=j+1,lastJ do
+                        --brickT[i][k][4]=lastJ-j
+                        brickT[i][k][3]=lastJ-j -- h
+                        brickT[i][k][5]=k-(j+1)
+                    end
+                    lastJ=-1
+                end
+            end
+        end
+    end
+end
+
+local function fillBrush(forceSize, brush, percentProgress)
+    print("START FILL", curX, curY)
+    brush = brush or curBrush
+    local fillCount = 0
+    for i,item in ipairs(brush) do
+        --item = brush[1]
+        --printf("brusht",item[1],item[2])
+        if brickT[curX+item[1]][curY+item[2]][1]==0 then -- if the first square is empty, double check?
+            local tryWidth = forceSize or ceil(random(0,5)*0.5)--math.randint(0,3)--0...2
+            local tryHeight = forceSize or ceil(random(0,5)*0.5)--math.randint(0,3)
+            print("try", tryWidth, tryHeight)
+            local maxW = tryWidth -- zero based!
+            local maxH = tryHeight
+            --printf("tries",maxW,maxH)
+            for k=0,tryWidth do
+                for l=0,tryHeight do
+                    --[[if not BrushContains(item[1]+k,item[2]+l,brush) then
+                        printf("failed brush bounds",k,l)
+                        --constrK,constrL = BrushLimit(item[1]+k,item[2]+l)
+                        maxW = math.fmin(maxW,k-1)--+constrK)
+                        maxH = math.fmin(maxH,l-1)--+constrL)
+                        --printf("new minima",maxW,maxH)
+                        break]]
+                    if not brushContains(item[1]+k,item[2]+l,brush) or brickT[curX+item[1]+k][curY+item[2]+l][1]~=0 then --curX+item[1]+k+1<levelProps.sizeX and curX+item[1]+k+1<levelProps.sizeY
+                        --printf("fail: occupied",item[1],k,item[2],l)
+                        if l==0 then
+                            maxW = math.min(maxW,k-1)
+                        else
+                            maxH = math.min(maxH,l-1)
+                        end
+                        break
+                    end
+                end
+            end
+            if maxW<0 then maxW=0 end
+            if maxH<0 then maxH=0 end
+            --printf(item[1],item[2],"maxWH",maxW,maxH)
+            for k=0,maxW do -- now fill it
+                for l=0,maxH do
+                    brickT[curX+item[1]+k][curY+item[2]+l] = {selBrickType,maxW+1,maxH+1,k,l} -- max is 1-based here!!
+                    --	printf(selBrickType,maxW,maxH,k,l)
+                    --if k==0 and l==0 then printf("fill",maxW,maxH) end
+                end
+            end
+            fillCount = fillCount+1
+            if math.fmod(fillCount,20)==19 then
+                renderProgress(editorStatusMsg,i/#brush)
+            end
+            --printf("endfill")
+        end
+    end
+end
+
+local function emptyBrush(brush)
+    brush = brush or curBrush
+    for i,item in pairs(brush) do
+        local curBrick = brickT[curX+item[1]][curY+item[2]]
+        if curBrick[1]>2 then -- if the  square is not empty
+            if curBrick[1]==7 then
+                kmax = curBrick[3]-1-curBrick[4]
+                lmax = curBrick[3]-1-curBrick[5]
+            else
+                kmax = curBrick[2]-1-curBrick[4]
+                lmax = curBrick[3]-1-curBrick[5]
+            end
+            for k = 0-curBrick[4],kmax do
+                for l = 0-curBrick[5],lmax do
+                    brickT[curX+item[1]+k][curY+item[2]+l] = {0,1,1,0,0}
+                end
+            end
+        end
+    end
+end
+
+local function condenseBricks()
+    --local brickTypeBU = selBrickType
+    --xBU,yBU,curX,curY = curX,curY,1,1
+    for color = 3,6 do
+        editorStatusMsg = "Compacting "..blockNames[color-2].."s..."
+        condenseBrush = {}
+        --add all 1x1 of color
+        for i = 1,levelProps.sizeX do
+            for j = 1,levelProps.sizeY do
+                local curBrick = brickT[i][j]
+                if curBrick[1]==color and curBrick[2]==1 and curBrick[3]==1 then
+                    table.insert(condenseBrush,{i-1,j-1})
+                    print("insert",i,j)
+                end
+                curBrick = nil
+            end
+        end
+        emptyBrush(condenseBrush)
+        selBrickType = color
+        fillBrush(2,condenseBrush,true) -- todo use no forcesize but random
+    end
+    --selBrickType = brickTypeBU
+    --curX,curY = xBU,yBU
+    --brickTypeBU = nil
+    editorStatusMsg = "Compacting done"
+    --RenderEditor()
+end
+
 local function createBrickT(cgSizeInBlocks, sobs)
     -- cg blocks are 32x32 pixels, eg tiles are 8x8. So, multiply by 4 to get the same dimensions
-    local geSizeX = max(cgSizeInBlocks[1] *4)
-    local geSizeY = max(cgSizeInBlocks[2] *4)
+    local geSizeX = cgSizeInBlocks[1] * 4
+    local geSizeY = cgSizeInBlocks[2] * 4
     local brickT = {}
     local floor = math.floor
+
+    local function concreteLast(a, b)
+        -- by processing concrete last, we make sure colored bricks don't overlap concrete
+        return a[5] < b[5]
+    end
+    table.sort(sobs, concreteLast)
 
     -- initialize empty brickT
     for x = 1, geSizeX do
@@ -121,15 +272,43 @@ local function createBrickT(cgSizeInBlocks, sobs)
     print("brickT dim", #brickT, #brickT[1])
 
 
-    local curBrick
+    local curBrick, curBrickX, curBrickY, curBrickType
     for _,sob in ipairs(sobs) do
-        curBrick = brickT[floor(sob[1]/2) + 1][floor(sob[2]/2) + 1]
-        curBrick[1] = geBrickType(sob[5], sob[6])
+        curBrickX = floor(sob[1]/2) + 1
+        curBrickY = floor(sob[2]/2) + 1
+        curBrick = brickT[curBrickX][curBrickY]
+        curBrickType = geBrickType(sob[5], sob[6])
+        curBrick[1] = curBrickType
         if curBrick[1] == 7 then
             -- concrete; set width and height
             local concreteSize = sob[4]/2
-            curBrick[2] = math.ceil(random(0, greyVariations[concreteSize])) -- pattern
+            local pattern = math.ceil(random(0, greyVariations[concreteSize])) -- pattern
+            curBrick[2] = pattern
             curBrick[3] = concreteSize -- size
+            for x = 0, concreteSize-1 do
+                for y = 0, concreteSize-1 do
+                    brickT[curBrickX+x][curBrickY+y] = {
+                        curBrickType,
+                        pattern, concreteSize,
+                        x,y
+                    }
+                end
+            end
+        else
+            local width = ceil(sob[3]/2) -- todo floor seems too conservative, ceil overwrites concrete blocks
+            local height = ceil(sob[4]/2)
+            print("color", width, height)
+            -- color
+            for x = 0, width-1 do
+                for y = 0, height-1 do
+                    brickT[curBrickX+x][curBrickY+y] = {
+                        curBrickType,
+                        1,1,
+                        0,0
+                    }
+
+                end
+            end
         end
     end
 
@@ -141,7 +320,7 @@ function love.load()
     sprite = love.graphics.newImage("sprite.png")
 
 
-    --local fp = io.open("nino1.cgl", "rb")
+    --local fp = io.open("nino2.cgl", "rb")
     local fp = io.open("level01.cgl", "rb")
 
     print("file", fp, type(fp))
@@ -157,8 +336,7 @@ function love.load()
     local soin = readInt(fp, size[1]*size[2], 1)
     for i,item in ipairs(soin) do
         soin[i] = bit32.band(item, 127) -- ignore most significant bit
-    end
-    numSobs = table.sum(soin)
+    end numSobs = table.sum(soin)
 
     assertHeader(fp, "SOBS")
     local sobs = {}
@@ -193,8 +371,12 @@ function love.load()
     end
 
     print("numsobs", numSobs, #sobs)
-    inspect(sobs[1])
+    inspect(sobs[2])
     brickT = createBrickT(size, sobs)
+    levelProps.sizeX = #brickT
+    levelProps.sizeY = #brickT[1]
+    condenseBricks()
+
     love.window.setMode( 1280,size[2]*32, {display=2} )
 
 
