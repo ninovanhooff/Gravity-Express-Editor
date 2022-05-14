@@ -153,9 +153,9 @@ end
 --- weighted bricksize, where larger bricks are more likely, returns 0-based size
 local function randomBrickSize()
     local value = random()
-    if value < 0.1 then
+    if value < 0.2 then
         return 0
-    elseif value < 0.5 then
+    elseif value < 0.6 then
         return 1
     else
         return 2
@@ -255,7 +255,7 @@ local function condenseBricks()
         end
         emptyBrush(condenseBrush)
         selBrickType = color
-        fillBrush(2,condenseBrush,true) -- todo use no forcesize but random
+        fillBrush(nil,condenseBrush,true) -- todo use no forcesize but random
     end
     --selBrickType = brickTypeBU
     --curX,curY = xBU,yBU
