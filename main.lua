@@ -4,6 +4,15 @@
 --- DateTime: 13/05/2022 16:58
 ---
 
+------ Name without extension
+local fileName = "LEVEL20"
+require("drawutil")
+require("specialsView")
+require("serialize")
+levelT = require(fileName .. "_intermediate")
+specialT = levelT.specialT
+levelProps = levelT.levelProps
+
 local bit32 = require("bit")
 local unpack = love.data.unpack
 local random = love.math.random
@@ -13,9 +22,9 @@ local renderProgress = print
 local curX, curY = 1,1
 local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
-local levelProps = {}
-
-local fileName = "LEVEL01.CGL"
+-- todo, not the level, but the screen size in tiles. For now, we want show the entire level on a single screen
+gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
+frameCounter = 0
 
 local units_in_block = 8
 
@@ -38,11 +47,9 @@ function table.sum(tbl)
     return sum
 end
 
-function love.draw()
-    --print("Frame-----")
+local function drawBricks()
     local numDraws = 0
     local brickT = brickT
-    local quad, width, height, srcX, sizeOffsetX, sizeOffsetY
     local x,y = 1,1
     while x < levelProps.sizeX do
         y = 1
@@ -63,14 +70,29 @@ function love.draw()
                     sizeOffsetY = sumT[curBrick[3]]
                     srcX = (curBrick[1] - 3) * 48 + sizeOffsetX
                 end
-                --todo creating quads has terrible performance
-                quad = love.graphics.newQuad(srcX, sizeOffsetY, width, height, sprite:getWidth(), sprite:getHeight())
-                love.graphics.draw(sprite, quad, (x-camPos[1])*8, (y-camPos[2])*8)
+
+                drawSprite((x-camPos[1])*8, (y-camPos[2])*8, _, srcX, sizeOffsetY, width, height)
             end
             y = y + curBrick[3]-curBrick[5]
         end
         x = x + 1
     end
+end
+
+local function drawSpecials()
+    for i,item in ipairs(specialT) do -- special blocks
+        scrX,scrY = (item.x-camPos[1])*8-camPos[3],(item.y-camPos[2])*8-camPos[4]
+        if item.x+item.w>=camPos[1] and item.x<=camPos[1]+gameWidthTiles+1 and item.y+item.h>=camPos[2] and item.y<camPos[2]+gameHeightTiles+1 then
+            specialRenders[item.sType-7](item)
+        end
+    end
+end
+
+
+function love.draw()
+    --print("Frame-----")
+    drawBricks()
+    drawSpecials()
     --print("---- numDraws", numDraws)
 end
 
@@ -129,7 +151,6 @@ local function brushContains(k, l, brush)
     return false
 end
 
-
 local function optimizeEmptySpace()
     for i=1,levelProps.sizeX do
         local lastJ = -1
@@ -174,7 +195,6 @@ local function fillBrush(forceSize, brush, percentProgress)
         if brickT[curX+item[1]][curY+item[2]][1]==0 then -- if the first square is empty, double check?
             local tryWidth = forceSize or randomBrickSize()
             local tryHeight = forceSize or randomBrickSize()
-            print("try", tryWidth, tryHeight)
             local maxW = tryWidth -- zero based!
             local maxH = tryHeight
             --printf("tries",maxW,maxH)
@@ -250,7 +270,6 @@ local function condenseBricks()
                 local curBrick = brickT[i][j]
                 if curBrick[1]==color and curBrick[2]==1 and curBrick[3]==1 then
                     table.insert(condenseBrush,{i-1,j-1})
-                    print("insert",i,j)
                 end
                 curBrick = nil
             end
@@ -315,7 +334,6 @@ local function createBrickT(cgSizeInBlocks, sobs)
         else
             local width = ceil(sob[3]/2) -- todo floor seems too conservative, ceil overwrites concrete blocks
             local height = ceil(sob[4]/2)
-            print("color", width, height)
             -- color
             for x = 0, width-1 do
                 for y = 0, height-1 do
@@ -338,10 +356,12 @@ function love.load()
     brickT = {}
     sprite = love.graphics.newImage("sprite.png")
 
-
-    local fp = io.open(fileName, "rb")
+    local fp = io.open(fileName .. ".CGL", "rb")
 
     print("file", fp, type(fp))
+    if not fp then
+        error("file not found:" .. fileName)
+    end
 
     -- file header
     assertHeader(fp, "CGL1")
@@ -390,59 +410,18 @@ function love.load()
 
     print("numsobs", numSobs, #sobs)
     brickT = createBrickT(size, sobs)
-    levelProps.sizeX = #brickT
-    levelProps.sizeY = #brickT[1]
+    assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
+    assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
     condenseBricks()
-
-    for i,item in ipairs(brickT) do
-        for j,jtem in ipairs(item) do
-            if jtem[1] == 3 and jtem[4] == 0 and jtem[5] == 0 then
-                print("-- ", i, j)
-                inspect(jtem)
-            end
-        end
-    end
+    optimizeEmptySpace()
 
     local displayIdx = 2
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
-
-
-    --assertHeader(fp, "VENT")
-    --local numFans = readInt(fp, 1, 4)[1]
-    --print("numFans", numFans)
-    --readInt(fp, numFans * 38, 1)
-    --
-    --assertHeader(fp, "MAGN")
-    --local numMagnets = readInt(fp, 1, 4)[1]
-    --print("numMagnets", numMagnets)
-    --readInt(fp, numMagnets * 38, 1)
-    --
-    --assertHeader(fp, "DIST")
-    --local numRotators = readInt(fp, 1, 4)[1]
-    --print("numRotators", numRotators)
-    --readInt(fp, numRotators * 38, 1)
-    --
-    --assertHeader(fp, "CANO")
-    --local numCannons = readInt(fp, 1, 4)[1]
-    --print("numCannons", numCannons)
-    --readInt(fp, numCannons * 51, 1)
-    --
-    --assertHeader(fp, "PIPE")
-    --local numRods = readInt(fp, 1, 4)[1]
-    --print("numRods", numRods)
-    --readInt(fp, numRods * 38, 1)
-    --
-    --assertHeader(fp, "ONEW")
-    --local numOneWays = readInt(fp, 1, 4)[1]
-    --print("numOneWays", numOneWays)
-    --readInt(fp, numOneWays * 38, 1)
-    --
-    --assertHeader(fp, "BARR")
-    --local numBarriers = readInt(fp, 1, 4)[1]
-    --print("numBarriers", numBarriers)
-    --readInt(fp, numBarriers * 38, 1)
-    
-
+    writeLua(fileName .. ".lua", {
+        levelProps = levelProps,
+        specialT = specialT,
+        brickT = brickT,
+    })
     --love.event.quit()
 
 end
