@@ -337,12 +337,37 @@ local function createBrickT(cgSizeInBlocks, sobs)
             -- color
             for x = 0, width-1 do
                 for y = 0, height-1 do
-                    brickT[curBrickX+x][curBrickY+y] = {
+                    local curBrick = {
                         curBrickType,
                         1,1,
                         0,0
                     }
+                    if x == width-1 and (sob[3]/2) % 1 == 0.5 then
+                        curBrick.halfWidth = true
+                    end
+                    if y == height-1 and (sob[4]/2) % 1 == 0.5 then
+                        curBrick.halfHeight = true
+                    end
+                    brickT[curBrickX+x][curBrickY+y] = curBrick
+                end
+            end
+        end
+    end
 
+    for x, column in ipairs(brickT) do
+        for y,tile in ipairs(column) do
+            if tile.halfWidth then
+                if x < geSizeX and brickT[x+1][y][1] == 0 then --~= tile[1] then
+                    -- tile to the right is not the same type as this one.
+                    -- discard this  half-tile.
+                    brickT[x][y] = {0,1,1,0,0}
+                end
+            end
+            if tile.halfHeight then
+                if y < geSizeY and brickT[x][y+1][1] == 0 then --~= tile[1] then
+                    -- tile below is not the same type as this one.
+                    -- discard this half-tile.
+                    brickT[x][y] = {0,1,1,0,0}
                 end
             end
         end
