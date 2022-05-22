@@ -446,7 +446,7 @@ function love.load(args)
     local displayIdx = 2
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
     love.window.setPosition(20,20, displayIdx)
-    writeLua(fileName .. ".lua", {
+    writeLua("lua-levels/" .. fileName .. ".lua", {
         levelProps = levelProps,
         specialT = specialT,
         brickT = brickT,

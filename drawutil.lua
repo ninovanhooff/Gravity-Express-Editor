@@ -4,7 +4,14 @@
 --- DateTime: 15/05/2022 18:32
 ---
 
+local floor = math.floor
+
+
 function drawSprite(x,y,_,srcX,srcY,w,h)
     quad = love.graphics.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
     love.graphics.draw(sprite, quad, x, y)
+end
+
+function loopAnim(frames,skip)
+    return floor((frameCounter % (frames*skip))*(1/skip))
 end
