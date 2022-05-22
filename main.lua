@@ -5,13 +5,9 @@
 ---
 
 ------ Name without extension
-local fileName = "LEVEL20"
 require("drawutil")
 require("specialsView")
 require("serialize")
-levelT = require(fileName .. "_intermediate")
-specialT = levelT.specialT
-levelProps = levelT.levelProps
 
 local bit32 = require("bit")
 local unpack = love.data.unpack
@@ -22,11 +18,9 @@ local renderProgress = print
 local curX, curY = 1,1
 local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
--- todo, not the level, but the screen size in tiles. For now, we want show the entire level on a single screen
-gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
-frameCounter = 0
 
 local units_in_block = 8
+local halfBrickEnabled = false
 
 -- brickT constants
 sumT = {0,8,24}
@@ -356,14 +350,14 @@ local function createBrickT(cgSizeInBlocks, sobs)
 
     for x, column in ipairs(brickT) do
         for y,tile in ipairs(column) do
-            if tile.halfWidth then
+            if tile.halfWidth and halfBrickEnabled then
                 if x < geSizeX and brickT[x+1][y][1] == 0 then --~= tile[1] then
                     -- tile to the right is not the same type as this one.
                     -- discard this  half-tile.
                     brickT[x][y] = {0,1,1,0,0}
                 end
             end
-            if tile.halfHeight then
+            if tile.halfHeight and halfBrickEnabled then
                 if y < geSizeY and brickT[x][y+1][1] == 0 then --~= tile[1] then
                     -- tile below is not the same type as this one.
                     -- discard this half-tile.
@@ -376,12 +370,21 @@ local function createBrickT(cgSizeInBlocks, sobs)
     return brickT
 end
 
-function love.load()
-    love.keyboard.setKeyRepeat( true )
-    brickT = {}
-    sprite = love.graphics.newImage("sprite.png")
+function love.load(args)
+    local fileName = args[1]
 
-    local fp = io.open(fileName .. ".CGL", "rb")
+    love.keyboard.setKeyRepeat( true )
+    levelT = require("intermediates/" .. fileName .. "_intermediate")
+    specialT = levelT.specialT
+    levelProps = levelT.levelProps
+    brickT = {}
+    -- todo, not the level, but the screen size in tiles. For now, we want show the entire level on a single screen
+    gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
+    frameCounter = 0
+    sprite = love.graphics.newImage("sprite.png")
+    inspect(args)
+
+    local fp = io.open("test-levels/" .. fileName .. ".CGL", "rb")
 
     print("file", fp, type(fp))
     if not fp then
@@ -442,6 +445,7 @@ function love.load()
 
     local displayIdx = 2
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
+    love.window.setPosition(20,20, displayIdx)
     writeLua(fileName .. ".lua", {
         levelProps = levelProps,
         specialT = specialT,
