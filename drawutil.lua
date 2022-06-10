@@ -5,11 +5,16 @@
 ---
 
 local floor = math.floor
+local gfx  = love.graphics
 
 
 function drawSprite(x,y,_,srcX,srcY,w,h)
-    quad = love.graphics.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
-    love.graphics.draw(sprite, quad, x, y)
+    quad = gfx.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
+    gfx.draw(sprite, quad, x, y)
+end
+
+function pgeDrawRectoutline(x, y, w, h, color) 
+    gfx.rectangle("line", x, y, w, h)
 end
 
 function loopAnim(frames,skip)

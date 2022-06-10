@@ -5,9 +5,12 @@
 ---
 
 ------ Name without extension
+require("util")
 require("drawutil")
 require("specialsView")
 require("serialize")
+
+editorMode = true
 
 local bit32 = require("bit")
 local unpack = love.data.unpack
