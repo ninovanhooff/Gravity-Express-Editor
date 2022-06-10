@@ -18,6 +18,7 @@ local renderProgress = print
 local curX, curY = 1,1
 local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
+local canvas
 
 local units_in_block = 8
 local halfBrickEnabled = false
@@ -84,10 +85,7 @@ end
 
 
 function love.draw()
-    --print("Frame-----")
-    drawBricks()
-    drawSpecials()
-    --print("---- numDraws", numDraws)
+
 end
 
 local function assertHeader(self, name)
@@ -446,12 +444,25 @@ function love.load(args)
     local displayIdx = 2
     love.window.setMode( size[1]*32,size[2]*32, {display=displayIdx, resizable = true, x=1, y=1} )
     love.window.setPosition(20,20, displayIdx)
+    canvas = love.graphics.newCanvas(size[1]*32, size[2]*32)
+
+
     writeLua("lua-levels/" .. fileName .. ".lua", {
         levelProps = levelProps,
         specialT = specialT,
         brickT = brickT,
     })
-    --love.event.quit()
+
+    love.graphics.setCanvas(canvas)
+    --print("Frame-----")
+    drawBricks()
+    drawSpecials()
+    --print("---- numDraws", numDraws)
+    love.graphics.setCanvas()
+
+    love.filesystem.setIdentity( "GravityExpressEditor" )
+    canvas:newImageData():encode("png",fileName .. ".png")
+    love.event.quit()
 
 end
 
