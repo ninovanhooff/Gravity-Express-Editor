@@ -13,8 +13,10 @@ function drawSprite(x,y,_,srcX,srcY,w,h)
     gfx.draw(sprite, quad, x, y)
 end
 
-function pgeDrawRectoutline(x, y, w, h, color) 
+function pgeDrawRectoutline(x, y, w, h, color)
+    gfx.setColor(color)
     gfx.rectangle("line", x, y, w, h)
+    gfx.setColor(white)
 end
 
 function loopAnim(frames,skip)
