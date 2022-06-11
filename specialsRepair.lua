@@ -35,6 +35,9 @@ local function repairPlatform(item)
     local overlap = true -- will be set to false
     for x = item.x, item.x + item.w - 1 do
         curBrick = table.deepGet(brickT, x, item.y + 5)
+        if not curBrick then
+            return
+        end
         if curBrick[1] == 0 then
             overlap = false
             break
