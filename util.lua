@@ -7,3 +7,17 @@
 function boolToNum(bool)
     if bool then return 1 else return 0 end
 end
+
+--- returns value from a nested table, or nil
+--- example: table.deepGet({{a = 5}}, 1, "a") --> 5
+function table.deepGet(tbl, ...)
+    local indexes = {...}
+    local result = tbl[indexes[1]]
+    for i = 2, #indexes do
+        result = result[indexes[i]]
+        if result == nil then
+            return nil
+        end
+    end
+    return result
+end

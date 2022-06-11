@@ -7,9 +7,6 @@
 local floor = math.floor
 local fmod = math.fmod
 
-local white = {1,1,1} -- rgb
-local yellow = {1,1,0} -- rgb
-
 local pltfrmCoordT = {{224,178},{192,194},{0,216},{0,194},{0,178}}
 
 function RenderPlatform(item)
