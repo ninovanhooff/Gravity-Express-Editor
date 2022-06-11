@@ -29,6 +29,22 @@ local function fillBrickFromSample(sampleX, sampleY, startX, startY, w, h)
     end
 end
 
+local function repairPlatform(item)
+    -- if the entire bottom row of tiles is non-empty, move the platform up
+    local curBrick
+    local overlap = true -- will be set to false
+    for x = item.x, item.x + item.w - 1 do
+        curBrick = table.deepGet(brickT, x, item.y + 5)
+        if curBrick[1] == 0 then
+            overlap = false
+            break
+        end
+    end
+    if overlap then
+        item.y = item.y -1
+    end
+end
+
 local function repairBarrier(item)
     local direction = item.direction
     if direction == DIR_UP then
@@ -58,7 +74,9 @@ local function repairBarrier(item)
         end
     end
 
+
     local specialRepairs = {
+        [8] = repairPlatform,
         [15] = repairBarrier
     }
 
