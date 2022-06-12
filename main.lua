@@ -16,6 +16,7 @@ editorMode = true
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
+purple = {1,0,1} -- rgb
 
 
 local bit32 = require("bit")
@@ -83,18 +84,7 @@ local function drawBricks()
     end
 end
 
-local function drawSpecials()
-    for i,item in ipairs(specialT) do -- special blocks
-        scrX,scrY = (item.x-camPos[1])*8-camPos[3],(item.y-camPos[2])*8-camPos[4]
-        if item.x+item.w>=camPos[1] and item.x<=camPos[1]+gameWidthTiles+1 and item.y+item.h>=camPos[2] and item.y<camPos[2]+gameHeightTiles+1 then
-            specialRenders[item.sType-7](item)
-        end
-    end
-end
-
-
 function love.draw()
-
 end
 
 local function assertHeader(self, name)
@@ -284,6 +274,7 @@ end
 
 function love.load(args)
     local fileName = args[1]
+    print("Filename", fileName)
 
     love.keyboard.setKeyRepeat( true )
     levelT = require("intermediates/" .. fileName .. "_intermediate")
@@ -294,11 +285,9 @@ function love.load(args)
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
     frameCounter = 0
     sprite = love.graphics.newImage("sprite.png")
-    inspect(args)
 
     local fp = io.open("test-levels/" .. fileName .. ".CGL", "rb")
 
-    print("file", fp, type(fp))
     if not fp then
         error("file not found:" .. fileName)
     end
@@ -371,7 +360,7 @@ function love.load(args)
     love.graphics.setCanvas(canvas)
     --print("Frame-----")
     drawBricks()
-    drawSpecials()
+    drawSpecials(camPos)
     --print("---- numDraws", numDraws)
     love.graphics.setCanvas()
 

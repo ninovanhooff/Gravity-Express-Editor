@@ -5,7 +5,8 @@
 ---
 
 local random = love.math.random
-local renderProgress = print
+local function noOp() end
+local renderProgress = noOp
 
 --- weighted bricksize, where larger bricks are more likely, returns 0-based size
 local function randomBrickSize()
@@ -30,7 +31,6 @@ local function brushContains(k, l, brush)
 end
 
 function fillBrush(forceSize, brush, percentProgress)
-    print("START FILL", curX, curY)
     brush = brush or curBrush
     local fillCount = 0
     for i,item in ipairs(brush) do
