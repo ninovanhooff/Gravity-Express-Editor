@@ -13,6 +13,9 @@ end
 function table.deepGet(tbl, ...)
     local indexes = {...}
     local result = tbl[indexes[1]]
+    if not result then
+        return nil
+    end
     for i = 2, #indexes do
         result = result[indexes[i]]
         if result == nil then
