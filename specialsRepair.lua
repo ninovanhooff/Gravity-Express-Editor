@@ -52,8 +52,8 @@ local function repairBarrier(item)
     local direction = item.direction
     if direction == DIR_UP then
         fillBrickFromSample(
-            item.x + 7, item.y + item.h - 6,
-            item.x + 6, item.y + item.h - 6,
+            item.x + 7, item.y + item.h - 4,
+            item.x + 6, item.y + item.h - 4,
             1, 2
         )
     elseif direction == DIR_DOWN then
