@@ -13,6 +13,7 @@ require("brush")
 require("serialize")
 
 editorMode = true
+condenseEnabled = true
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
@@ -342,7 +343,9 @@ function love.load(args)
     assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
     assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
     repairSpecials()
-    condenseBricks()
+    if condenseEnabled then
+        condenseBricks()
+    end
     optimizeEmptySpace()
 
     local displayIdx = 2
