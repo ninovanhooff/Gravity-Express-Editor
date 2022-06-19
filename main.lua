@@ -57,8 +57,7 @@ local function drawBricks()
         y = 1
         while y < levelProps.sizeY do
             curBrick = brickT[x][y]
-            if curBrick[1] ~= 0 and curBrick[4] == 0 and curBrick[5] == 0 then
-                --print("Drawing ", curBrick[1])
+            if curBrick[1] > 2 and curBrick[4] == 0 and curBrick[5] == 0 then
                 numDraws = numDraws + 1
                 height = curBrick[3] * 8
                 if curBrick[1] == 7 then
@@ -72,7 +71,6 @@ local function drawBricks()
                     sizeOffsetY = sumT[curBrick[3]]
                     srcX = (curBrick[1] - 3) * 48 + sizeOffsetX
                 end
-
                 drawSprite((x-camPos[1])*8, (y-camPos[2])*8, _, srcX, sizeOffsetY, width, height)
             end
             y = y + curBrick[3]-curBrick[5]
