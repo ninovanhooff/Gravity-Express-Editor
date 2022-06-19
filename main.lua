@@ -15,7 +15,7 @@ require("serialize")
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8
-gfxEnabled = false -- when false, no image displayed, but written to file. Useful for commandline-usage
+gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
 condenseEnabled = true
 curX, curY = 1,1
@@ -82,6 +82,8 @@ local function drawBricks()
 end
 
 function love.draw()
+    drawBricks()
+    drawSpecials(camPos)
 end
 
 local function optimizeEmptySpace()
@@ -161,26 +163,25 @@ function love.load(args)
         local displayIdx = 2
         love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
         love.window.setPosition(20,20, displayIdx)
+    else
+        writeLua("lua-levels/" .. fileName .. ".lua", {
+            levelProps = levelProps,
+            specialT = specialT,
+            brickT = brickT,
+        })
+
+        canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
+        love.graphics.setCanvas(canvas)
+        --print("Frame-----")
+        drawBricks()
+        drawSpecials(camPos)
+        --print("---- numDraws", numDraws)
+        love.graphics.setCanvas()
+
+        love.filesystem.setIdentity( "GravityExpressEditor" )
+        canvas:newImageData():encode("png",fileName .. ".png")
+        love.event.quit()
     end
-    canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
-
-
-    writeLua("lua-levels/" .. fileName .. ".lua", {
-        levelProps = levelProps,
-        specialT = specialT,
-        brickT = brickT,
-    })
-
-    love.graphics.setCanvas(canvas)
-    --print("Frame-----")
-    drawBricks()
-    drawSpecials(camPos)
-    --print("---- numDraws", numDraws)
-    love.graphics.setCanvas()
-
-    love.filesystem.setIdentity( "GravityExpressEditor" )
-    canvas:newImageData():encode("png",fileName .. ".png")
-    love.event.quit()
 
 end
 
