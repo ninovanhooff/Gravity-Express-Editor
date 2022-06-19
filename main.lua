@@ -136,29 +136,42 @@ local function condenseBricks()
 end
 
 function love.load(args)
+    love.keyboard.setKeyRepeat( true )
+    sprite = love.graphics.newImage("sprite.png")
+    frameCounter = 0
+
     local fileName = args[1]
     print("Filename", fileName)
 
-    love.keyboard.setKeyRepeat( true )
-    levelT = require("intermediates/" .. fileName .. "_intermediate")
-    specialT = levelT.specialT
-    levelProps = levelT.levelProps
-    brickT = {}
-    -- todo, not the level, but the screen size in tiles. For now, we want show the entire level on a single screen
-    gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
-    frameCounter = 0
-    sprite = love.graphics.newImage("sprite.png")
+    -- READ INPUT
+    if args[2] == "lua" then
+        print("Reading Gravity Express format")
+        local levelT = require("lua-levels/" .. fileName)
+        specialT = levelT.specialT
+        levelProps = levelT.levelProps
+        brickT = levelT.brickT
+    else
+        print("Converting cgl + intermediate lua result from vgl reader")
+        levelT = require("intermediates/" .. fileName .. "_intermediate")
+        specialT = levelT.specialT
+        levelProps = levelT.levelProps
+        brickT = {}
 
-    brickT = readCglBrickT(fileName)
+        brickT = readCglBrickT(fileName)
 
-    assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
-    assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
-    repairSpecials()
-    if condenseEnabled then
-        condenseBricks()
+        assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
+        assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
+        repairSpecials()
+        if condenseEnabled then
+            condenseBricks()
+        end
+        optimizeEmptySpace()
     end
-    optimizeEmptySpace()
 
+    gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
+
+
+    -- OUTPUT
     if gfxEnabled then
         local displayIdx = 2
         love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )

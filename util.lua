@@ -8,6 +8,10 @@ function boolToNum(bool)
     if bool then return 1 else return 0 end
 end
 
+function ends_with(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end
+
 --- returns value from a nested table, or nil
 --- example: table.deepGet({{a = 5}}, 1, "a") --> 5
 function table.deepGet(tbl, ...)
