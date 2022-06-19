@@ -7,9 +7,16 @@
 local floor = math.floor
 local gfx  = love.graphics
 
+local quadCache = {}
+
 
 function drawSprite(x,y,_,srcX,srcY,w,h)
-    quad = gfx.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
+    local cacheKey = "" .. x .. y .. srcX .. srcY .. w ..h
+    local quad = quadCache[cacheKey]
+    if not quad then
+        quad = gfx.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
+        quadCache[cacheKey] = quad
+    end
     gfx.draw(sprite, quad, x, y)
 end
 
