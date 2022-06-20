@@ -11,7 +11,7 @@ local quadCache = {}
 
 
 function drawSprite(x,y,_,srcX,srcY,w,h)
-    local cacheKey = "" .. x .. y .. srcX .. srcY .. w ..h
+    local cacheKey = "" .. srcX .. srcY .. w ..h
     local quad = quadCache[cacheKey]
     if not quad then
         quad = gfx.newQuad(srcX, srcY, w, h, sprite:getWidth(), sprite:getHeight())
