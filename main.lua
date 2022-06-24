@@ -17,7 +17,7 @@ require("serialize")
 tileSize = 8
 gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
-condenseEnabled = false
+condenseEnabled = true
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
@@ -168,19 +168,19 @@ function love.load(args)
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
 
+    -- FILE WRITE
+    writeLua("lua-levels/" .. fileName .. ".lua", {
+        levelProps = levelProps,
+        specialT = specialT,
+        brickT = brickT,
+    })
 
-    -- OUTPUT
+    -- IMAGE OUT
     if gfxEnabled then
         local displayIdx = 2
         love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
         love.window.setPosition(20,20, displayIdx)
     else
-        writeLua("lua-levels/" .. fileName .. ".lua", {
-            levelProps = levelProps,
-            specialT = specialT,
-            brickT = brickT,
-        })
-
         canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
         love.graphics.setCanvas(canvas)
         --print("Frame-----")

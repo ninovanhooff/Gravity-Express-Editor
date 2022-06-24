@@ -10,7 +10,6 @@ local random = love.math.random
 local ceil = math.ceil
 
 local units_in_block = 8
-local halfBrickEnabled = false
 
 local function assertHeader(self, name)
     print(name)
@@ -114,32 +113,7 @@ local function createBrickT(cgSizeInBlocks, sobs)
                         1,1,
                         0,0
                     }
-                    if x == width-1 and (sob[3]/2) % 1 == 0.5 then
-                        curBrick.halfWidth = true
-                    end
-                    if y == height-1 and (sob[4]/2) % 1 == 0.5 then
-                        curBrick.halfHeight = true
-                    end
                     brickT[curBrickX+x][curBrickY+y] = curBrick
-                end
-            end
-        end
-    end
-
-    for x, column in ipairs(brickT) do
-        for y,tile in ipairs(column) do
-            if tile.halfWidth and halfBrickEnabled then
-                if x < geSizeX and brickT[x+1][y][1] == 0 then --~= tile[1] then
-                    -- tile to the right is not the same type as this one.
-                    -- discard this  half-tile.
-                    brickT[x][y] = {0,1,1,0,0}
-                end
-            end
-            if tile.halfHeight and halfBrickEnabled then
-                if y < geSizeY and brickT[x][y+1][1] == 0 then --~= tile[1] then
-                    -- tile below is not the same type as this one.
-                    -- discard this half-tile.
-                    brickT[x][y] = {0,1,1,0,0}
                 end
             end
         end
