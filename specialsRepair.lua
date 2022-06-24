@@ -64,8 +64,8 @@ local function repairBarrier(item)
             )
     elseif direction == DIR_LEFT then
             fillBrickFromSample(
-                item.x + item.w - 6, item.y + 7,
-                item.x + item.w - 6, item.y + 6,
+                item.x + item.w - 4, item.y + 7,
+                item.x + item.w - 4, item.y + 6,
                 4, 1
             )
     elseif direction == DIR_RIGHT then
