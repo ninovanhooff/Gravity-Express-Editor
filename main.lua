@@ -17,7 +17,7 @@ require("serialize")
 tileSize = 8
 gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
-condenseEnabled = true
+condenseEnabled = false
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
@@ -80,8 +80,8 @@ local function drawBricks()
 end
 
 function love.draw()
-    drawBricks()
     drawSpecials(camPos)
+    drawBricks()
 end
 
 local function optimizeEmptySpace()
@@ -149,7 +149,7 @@ function love.load(args)
         levelProps = levelT.levelProps
         brickT = levelT.brickT
     else
-        print("Converting cgl + intermediate lua result from vgl reader")
+        print("Converting cgl + intermediate lua result from cgl reader")
         levelT = require("intermediates/" .. fileName .. "_intermediate")
         specialT = levelT.specialT
         levelProps = levelT.levelProps
@@ -197,7 +197,11 @@ function love.load(args)
 end
 
 function love.keypressed(key, _, _)
-    if key == "right" then
+    if key == "left" and camPos[1] > 1 then
+        camPos[1] = camPos[1] - 1
+    elseif key == "up" and camPos[2] > 1 then
+        camPos[2] = camPos[2] - 1
+    elseif key == "right" then
         camPos[1] = camPos[1] + 1
     elseif key == "down" then
         camPos[2] = camPos[2] + 1
