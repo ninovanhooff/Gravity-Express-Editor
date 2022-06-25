@@ -134,36 +134,46 @@ local function condenseBricks()
 end
 
 function love.load(args)
-    mytable = setmetatable({key1 = "value1"}, {
-        __index = function(tbl, key)
-            print("blerb")
-            if key == "key2" then
-                return "metatablevalue"
-            else
-                return tbl[key]
+    local format = "BBBBB"
+    --local packed = love.data.pack("string", format, 23, 56, 255)
+    --local unpacked = {love.data.unpack(format, packed)}
+    --print("packed", packed, unpacked)
+    --inspect(unpacked)
+    --local packedTable = {packed}
+
+    local brickT = {
+        {{3, 1,1,6,9}, {2,6,5,4,9}},
+        {{8, 1,1,6,9}, {1,6,5,4,9}}
+    }
+
+    for x, xtem in ipairs(brickT) do
+        for y,ytem in ipairs(xtem) do
+            xtem[y]=love.data.pack("string", format, unpack(ytem))
+        end
+    end
+
+    print("packed", "<"..brickT[1][1]..">")
+
+    for x, xtem in ipairs(brickT) do
+        local meta = {compressed = xtem}
+        local unpackMeta = {
+            __index = function(tbl, idx)
+                print("hello idx", idx, tbl)
+                inspect(tbl)
+                return {love.data.unpack(format, tbl.compressed[idx])}
             end
-        end
-    })
+        }
 
-    print(mytable.key1,mytable.key2)
+        brickT[x]= setmetatable(meta, unpackMeta)
+    end
+
+    print(brickT[1][1])
+    print(brickT[2][2][2])
 
 
-    local format = "BBB"
-    local packed = love.data.pack("string", format, 23, 56, 255)
-    local unpacked = {love.data.unpack(format, packed)}
-    print("packed", packed, unpacked)
-    inspect(unpacked)
-    local packedTable = {packed}
-    local meta = {compressed = packedTable}
-    packedTable = setmetatable(meta, {
-        __index = function(tbl, idx)
-            print("hello idx", idx, tbl, packedTable)
-            return {love.data.unpack(format, tbl.compressed[idx])}
-        end
-    })
-    print(packedTable[1])
-    inspect(packedTable[1])
 
+    love.event.quit()
+    error("done")
 
 
     love.keyboard.setKeyRepeat( true )
