@@ -134,6 +134,38 @@ local function condenseBricks()
 end
 
 function love.load(args)
+    mytable = setmetatable({key1 = "value1"}, {
+        __index = function(tbl, key)
+            print("blerb")
+            if key == "key2" then
+                return "metatablevalue"
+            else
+                return tbl[key]
+            end
+        end
+    })
+
+    print(mytable.key1,mytable.key2)
+
+
+    local format = "BBB"
+    local packed = love.data.pack("string", format, 23, 56, 255)
+    local unpacked = {love.data.unpack(format, packed)}
+    print("packed", packed, unpacked)
+    inspect(unpacked)
+    local packedTable = {packed}
+    local meta = {compressed = packedTable}
+    packedTable = setmetatable(meta, {
+        __index = function(tbl, idx)
+            print("hello idx", idx, tbl, packedTable)
+            return {love.data.unpack(format, tbl.compressed[idx])}
+        end
+    })
+    print(packedTable[1])
+    inspect(packedTable[1])
+
+
+
     love.keyboard.setKeyRepeat( true )
     sprite = love.graphics.newImage("sprite.png")
     frameCounter = 0
