@@ -4,6 +4,8 @@
 --- DateTime: 10/06/2022 13:52
 ---
 
+require("tableCompressor")
+
 function boolToNum(bool)
     if bool then return 1 else return 0 end
 end

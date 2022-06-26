@@ -15,7 +15,7 @@ require("serialize")
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8
-gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
+gfxEnabled = false -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
 condenseEnabled = true
 curX, curY = 1,1
@@ -87,23 +87,28 @@ end
 local function optimizeEmptySpace()
     for i=1,levelProps.sizeX do
         local lastJ = -1
-        for j=levelProps.sizeY,1,-1 do
-            if brickT[i][j][1]<3 and j>1 then -- empty space
+        for j=levelProps.sizeY,1,-1 do -- traverse column BACKWARDS
+            if brickT[i][j][1]<3 and j>1 and (lastJ == -1 or lastJ - j < 255) then -- empty space with max height of 254
                 if lastJ==-1 then
-                    lastJ = j
+                    lastJ = j -- set END y of empty space
                 end
             else -- always for j==1
                 if lastJ~=-1 then
                     for k=j+1,lastJ do
                         --brickT[i][k][4]=lastJ-j
                         brickT[i][k][3]=lastJ-j -- h
-                        brickT[i][k][5]=k-(j+1)
+                        brickT[i][k][5]=k-(j+1) -- cur Y sub index. 0-based
+                        if k == lastJ then
+                            print(brickT[i][k][5])
+                        end
                     end
                     lastJ=-1
                 end
             end
+
         end
     end
+    -- todo horizontal direction too?
 end
 
 local function condenseBricks()
@@ -134,48 +139,6 @@ local function condenseBricks()
 end
 
 function love.load(args)
-    local format = "BBBBB"
-    --local packed = love.data.pack("string", format, 23, 56, 255)
-    --local unpacked = {love.data.unpack(format, packed)}
-    --print("packed", packed, unpacked)
-    --inspect(unpacked)
-    --local packedTable = {packed}
-
-    local brickT = {
-        {{3, 1,1,6,9}, {2,6,5,4,9}},
-        {{8, 1,1,6,9}, {1,6,5,4,9}}
-    }
-
-    for x, xtem in ipairs(brickT) do
-        for y,ytem in ipairs(xtem) do
-            xtem[y]=love.data.pack("string", format, unpack(ytem))
-        end
-    end
-
-    print("packed", "<"..brickT[1][1]..">")
-
-    for x, xtem in ipairs(brickT) do
-        local meta = {compressed = xtem}
-        local unpackMeta = {
-            __index = function(tbl, idx)
-                print("hello idx", idx, tbl)
-                inspect(tbl)
-                return {love.data.unpack(format, tbl.compressed[idx])}
-            end
-        }
-
-        brickT[x]= setmetatable(meta, unpackMeta)
-    end
-
-    print(brickT[1][1])
-    print(brickT[2][2][2])
-
-
-
-    love.event.quit()
-    error("done")
-
-
     love.keyboard.setKeyRepeat( true )
     sprite = love.graphics.newImage("sprite.png")
     frameCounter = 0
@@ -183,7 +146,7 @@ function love.load(args)
     local fileName = args[1]
     print("Filename", fileName)
 
-    -- READ INPUT
+    -- READ INPUT FILE from args
     if args[2] == "lua" then
         print("Reading Gravity Express format")
         local levelT = require("lua-levels/" .. fileName)
@@ -210,12 +173,15 @@ function love.load(args)
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
 
+    table.compress(brickT)
+
     -- FILE WRITE
     writeLua("lua-levels/" .. fileName .. ".lua", {
         levelProps = levelProps,
-        specialT = specialT,
-        brickT = brickT,
+        specialT = specialT
     })
+
+    writeBrickT("lua-levels/" .. fileName .. ".bin", brickT)
 
     -- IMAGE OUT
     if gfxEnabled then
