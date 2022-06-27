@@ -84,7 +84,21 @@ function love.draw()
     drawBricks()
 end
 
+--- replace all non-cencrete bricks by 1x1 tiles, including empty space
+--- in other words, keep only the type([1]), and set sizing values to 1,1,0,0
+local function unOptimize()
+    print("--- unOptimizing")
+    for _, xTem in ipairs(brickT) do
+        for y, yTem in ipairs(xTem) do
+            if yTem[1] < 7 then
+                xTem[y] = {yTem[1], 1, 1, 0, 0}
+            end
+        end
+    end
+end
+
 local function optimizeEmptySpace()
+    print("--- optimizing empty space")
     for i=1,levelProps.sizeX do
         local lastJ = -1
         for j=levelProps.sizeY,1,-1 do -- traverse column BACKWARDS
@@ -98,9 +112,6 @@ local function optimizeEmptySpace()
                         --brickT[i][k][4]=lastJ-j
                         brickT[i][k][3]=lastJ-j -- h
                         brickT[i][k][5]=k-(j+1) -- cur Y sub index. 0-based
-                        if k == lastJ then
-                            print(brickT[i][k][5])
-                        end
                     end
                     lastJ=-1
                 end
@@ -112,6 +123,7 @@ local function optimizeEmptySpace()
 end
 
 local function condenseBricks()
+    print("--- condensing bricks")
     --local brickTypeBU = selBrickType
     --xBU,yBU,curX,curY = curX,curY,1,1
     for color = 3,6 do
@@ -165,18 +177,22 @@ function love.load(args)
         assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
         assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
         repairSpecials()
-        if condenseEnabled then
-            condenseBricks()
-        end
-        optimizeEmptySpace()
     end
+
+    unOptimize()
+    if condenseEnabled then
+        condenseBricks()
+    end
+    optimizeEmptySpace()
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
 
     table.compress(brickT)
 
     -- FILE WRITE
-    writeLua("lua-levels/" .. fileName .. ".lua", {
+    local luaFilePath = "lua-levels/" .. fileName .. ".lua"
+    print("--- writing ".. luaFilePath)
+    writeLua(luaFilePath, {
         levelProps = levelProps,
         specialT = specialT
     })

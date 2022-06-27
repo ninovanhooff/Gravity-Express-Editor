@@ -5,6 +5,7 @@
 ---
 
 function table.compress(tbl)
+    print("--- compressing table")
     local format = "BBBBB"
     levelProps.packFormat = format
     for x, xtem in ipairs(tbl) do

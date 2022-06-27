@@ -63,6 +63,7 @@ function writeLua( filepath, table_to_export )
 end
 
 function writeBrickT(filepath, table_to_export)
+    print("--- writing "..filepath)
     assert( filepath, "writeBrickT, filepath required")
     assert( table_to_export, "writeBrickT, table_to_export required")
 
