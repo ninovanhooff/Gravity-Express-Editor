@@ -108,7 +108,7 @@ local function optimizeEmptySpace()
 
         end
     end
-    -- todo horizontal direction too?
+    -- todo horizontal direction too? then maybe we need purely column / row based drawing. not the "fast" approach
 end
 
 local function condenseBricks()
