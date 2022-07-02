@@ -156,7 +156,7 @@ local function setCollisionBarrier(item)
     elseif item.direction==DIR_LEFT then
         for i=0,3 do
             for j=0,5 do
-                if not (i>1 and j<3) then
+                if not (i>1 and j<2) then
                     brickT[item.x+i+item.distance][item.y+j]={2,1,1,0,0} -- collision occupied
                 end
             end
