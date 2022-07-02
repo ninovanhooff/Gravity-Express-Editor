@@ -15,22 +15,26 @@ function rectSelection(x,y,w,h)
 end
 
 --- fill selection with {0,1,1,0,0} (1x1 empty tile)
-function clearSelection(selection)
+--- or {2,1,1,0,0} if markOccupied is true
+function clearSelection(selection, markOccupied)
+    local brickType = 0
+    if markOccupied then
+        brickType = 2
+    end
     for _, item in ipairs(selection) do
         local curBrick = brickT[item[1]][item[2]]
-        if curBrick[1]>2 then -- if the  square is not empty
-            if curBrick[1]==7 then
-                kmax = curBrick[3]-1-curBrick[4]
-                lmax = curBrick[3]-1-curBrick[5]
-            else
-                kmax = curBrick[2]-1-curBrick[4]
-                lmax = curBrick[3]-1-curBrick[5]
-            end
-            for k = 0-curBrick[4],kmax do
-                for l = 0-curBrick[5],lmax do
-                    brickT[item[1]+k][item[2]+l] = {0,1,1,0,0}
-                end
+        if curBrick[1]==7 then
+            kmax = curBrick[3]-1-curBrick[4]
+            lmax = curBrick[3]-1-curBrick[5]
+        else
+            kmax = curBrick[2]-1-curBrick[4]
+            lmax = curBrick[3]-1-curBrick[5]
+        end
+        for k = 0-curBrick[4],kmax do
+            for l = 0-curBrick[5],lmax do
+                brickT[item[1]+k][item[2]+l] = {brickType,1,1,0,0}
             end
         end
+
     end
 end

@@ -51,19 +51,27 @@ end
 local function repairCannon(item)
     local direction = item.direction
     if direction == DIR_UP or direction == DIR_DOWN then
-        clearSelection(rectSelection(item.x,item.y, 3,5)) -- receiver or emitter
-        clearSelection(rectSelection(item.x,item.y+item.h-5, 3,5)) -- emitter or receiver
+        if direction == DIR_UP then
+            clearSelection(rectSelection(item.x,item.y, 3,3), true) -- receiver
+            clearSelection(rectSelection(item.x,item.y+item.h-5, 3,5), true) -- emitter
+        else
+            clearSelection(rectSelection(item.x,item.y, 3,5), true) -- emitter
+            clearSelection(rectSelection(item.x,item.y+item.h-3, 3,3), true) -- receiver
+        end
         clearSelection(rectSelection(item.x+1, item.y, 1, item.h)) -- cannon ball travel path
-
     else -- horizontal
-        clearSelection(rectSelection(item.x,item.y, 5,3)) -- receiver or emitter
-        clearSelection(rectSelection(item.x+item.w-5,item.y, 5,3)) -- emitter or receiver
+        if direction == DIR_RIGHT then
+            clearSelection(rectSelection(item.x,item.y, 5,3), true) -- emitter
+            clearSelection(rectSelection(item.x+item.w-3,item.y, 3,3), true) -- receiver
+        else
+            clearSelection(rectSelection(item.x,item.y, 3,3), true) -- receiver
+            clearSelection(rectSelection(item.x+item.w-5,item.y, 5,3), true) -- emitter
+        end
         clearSelection(rectSelection(item.x, item.y+1, item.w, 1)) -- cannon ball travel path
     end
 end
 
 local function setCollisionBarrier(item)
-    print("set collision for barrier", item)
     if item.direction== DIR_UP then
         for i=0,5 do
             for j=0,3 do
@@ -124,6 +132,17 @@ local function setCollisionBarrier(item)
                 end
             end
         end
+    end
+end
+
+local function repairRod(item)
+    local coords = {};local receiverCoords = {}
+    if item.direction==1 then -- horiz
+        clearSelection(rectSelection(item.x,item.y, 3,3), true)
+        clearSelection(rectSelection(item.x+item.distance,item.y,3,3), true)
+    elseif item.direction==2 then -- vert
+        clearSelection(rectSelection(item.x, item.y,3,3), true)
+        clearSelection(rectSelection(item.x,item.y+item.distance,3,3), true)
     end
 end
 
@@ -224,6 +243,7 @@ end
 local specialRepairs = {
     [8] = repairPlatform,
     [12] = repairCannon,
+    [13] = repairRod,
     [14] = setCollision1Way,
     [15] = repairBarrier
 }
