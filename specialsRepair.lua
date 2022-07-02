@@ -4,7 +4,7 @@
 --- DateTime: 11/06/2022 18:57
 ---
 
-require("brush")
+require("selection")
 
 local DIR_UP = 1
 local DIR_DOWN = 2
@@ -48,6 +48,20 @@ local function repairPlatform(item)
     end
 end
 
+local function repairCannon(item)
+    local direction = item.direction
+    if direction == DIR_UP or direction == DIR_DOWN then
+        clearSelection(rectSelection(item.x,item.y, 3,5)) -- receiver or emitter
+        clearSelection(rectSelection(item.x,item.y+item.h-5, 3,5)) -- emitter or receiver
+        clearSelection(rectSelection(item.x+1, item.y, 1, item.h)) -- cannon ball travel path
+
+    else -- horizontal
+        clearSelection(rectSelection(item.x,item.y, 5,3)) -- receiver or emitter
+        clearSelection(rectSelection(item.x+item.w-5,item.y, 5,3)) -- emitter or receiver
+        clearSelection(rectSelection(item.x, item.y+1, item.w, 1)) -- cannon ball travel path
+    end
+end
+
 local function repairBarrier(item)
     local direction = item.direction
     if direction == DIR_UP then
@@ -74,20 +88,21 @@ local function repairBarrier(item)
                 item.x + 2, item.y + 6,
                 2, 1
             )
+    end
+end
+
+local specialRepairs = {
+    [8] = repairPlatform,
+    [12] = repairCannon,
+    [15] = repairBarrier
+}
+
+function repairSpecials()
+    print("--- repairSpecials")
+    for _, item in ipairs(specialT) do
+        local repairFun = specialRepairs[item.sType]
+        if repairFun then
+            repairFun(item)
         end
     end
-
-
-    local specialRepairs = {
-        [8] = repairPlatform,
-        [15] = repairBarrier
-    }
-
-    function repairSpecials()
-        for _, item in ipairs(specialT) do
-            local repairFun = specialRepairs[item.sType]
-            if repairFun then
-                repairFun(item)
-            end
-        end
-    end
+end

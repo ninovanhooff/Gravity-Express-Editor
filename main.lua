@@ -15,7 +15,7 @@ require("serialize")
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8
-gfxEnabled = false -- when false, no image displayed, but written to file. Useful for commandline-usage
+gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
 condenseEnabled = true
 curX, curY = 1,1
@@ -165,6 +165,7 @@ function love.load(args)
         specialT = levelT.specialT
         levelProps = levelT.levelProps
         brickT = levelT.brickT
+        unOptimize()
     else
         print("Converting cgl + intermediate lua result from cgl reader")
         levelT = require("intermediates/" .. fileName .. "_intermediate")
@@ -173,13 +174,13 @@ function love.load(args)
         brickT = {}
 
         brickT = readCglBrickT(fileName)
+        unOptimize()
 
         assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
         assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
         repairSpecials()
     end
 
-    unOptimize()
     if condenseEnabled then
         condenseBricks()
     end

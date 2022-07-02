@@ -4,6 +4,8 @@
 --- DateTime: 11/06/2022 19:36
 ---
 
+require("selection")
+
 local random = love.math.random
 local function noOp() end
 local renderProgress = noOp
@@ -82,22 +84,10 @@ function fillBrush(forceSize, brush, percentProgress)
 end
 
 function emptyBrush(brush)
+    local selection = {}
     brush = brush or curBrush
-    for i,item in pairs(brush) do
-        local curBrick = brickT[curX+item[1]][curY+item[2]]
-        if curBrick[1]>2 then -- if the  square is not empty
-            if curBrick[1]==7 then
-                kmax = curBrick[3]-1-curBrick[4]
-                lmax = curBrick[3]-1-curBrick[5]
-            else
-                kmax = curBrick[2]-1-curBrick[4]
-                lmax = curBrick[3]-1-curBrick[5]
-            end
-            for k = 0-curBrick[4],kmax do
-                for l = 0-curBrick[5],lmax do
-                    brickT[curX+item[1]+k][curY+item[2]+l] = {0,1,1,0,0}
-                end
-            end
-        end
+    for _,item in pairs(brush) do
+        table.insert(selection, {curX+item[1], curY + item[2]})
     end
+    clearSelection(selection)
 end
