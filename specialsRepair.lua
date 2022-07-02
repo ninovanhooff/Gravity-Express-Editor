@@ -57,6 +57,34 @@ local function repairPlatform(item)
     end
 end
 
+local function repairBlower(item)
+    local coords = {}
+    if item.direction==1 then
+        coords = {0,item.distance,6,8}
+    elseif item.direction==2 then
+        coords = {0,0,6,8}
+    elseif item.direction==3 then
+        coords = {item.distance,0,8,6}
+    else
+        coords = {0,0,8,6}
+    end
+    markOccupied(item,coords)
+end
+
+local function repairMagnet(item)
+    local coords = {}
+    if item.direction==1 then
+        coords = {0,item.distance,4,6}
+    elseif item.direction==2 then
+        coords = {0,0,4,6}
+    elseif item.direction==3 then
+        coords = {item.distance,0,6,4}
+    else
+        coords = {0,0,6,4}
+    end
+    markOccupied(item, coords)
+end
+
 local function repairRotator(item)
     local coords = {}
     if item.direction==1 then
@@ -68,7 +96,6 @@ local function repairRotator(item)
     else
         coords = {0,0,8,5}
     end
-    inspect(coords)
     markOccupied(item,coords)
 end
 
@@ -160,7 +187,6 @@ local function setCollisionBarrier(item)
 end
 
 local function repairRod(item)
-    local coords = {};local receiverCoords = {}
     if item.direction==1 then -- horiz
         clearSelection(rectSelection(item.x,item.y, 3,3), true)
         clearSelection(rectSelection(item.x+item.distance,item.y,3,3), true)
@@ -266,6 +292,8 @@ end
 
 local specialRepairs = {
     [8] = repairPlatform,
+    [9] = repairBlower,
+    [10] = repairMagnet,
     [11] = repairRotator,
     [12] = repairCannon,
     [13] = repairRod,
