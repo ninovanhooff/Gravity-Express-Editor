@@ -107,6 +107,10 @@ end
 function love.draw()
     drawSpecials(camPos)
     drawBricks()
+    if not love.keyboard.isDown('up', 'down', 'left', 'right') then
+        love.timer.sleep(0.1)
+    end
+
 end
 
 --- replace all non-cencrete bricks by 1x1 tiles, including empty space

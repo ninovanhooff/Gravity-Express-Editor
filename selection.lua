@@ -4,6 +4,15 @@
 --- DateTime: 02/07/2022 21:48
 ---
 
+function isEmpty(selection)
+    for _,item in ipairs(selection) do
+        if table.deepGet(brickT, item[1], item[2])[1]>=3 then
+            return false
+        end
+    end
+    return true
+end
+
 function rectSelection(x,y,w,h)
     local selection = {}
     for i = x,x+w-1 do

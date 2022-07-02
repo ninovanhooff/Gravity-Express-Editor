@@ -260,6 +260,28 @@ local function setCollision1Way(item)
     end
 end
 
+local function repair1Way(item)
+    local direction = item.direction
+    if direction == DIR_UP then
+        if isEmpty(rectSelection(item.x,item.y+item.h,4,1)) then
+            item.distance = item.distance + 1
+            item.h = item.h + 1
+            item.pos = item.pos + tileSize
+        end
+    elseif direction == DIR_DOWN then
+
+    elseif direction == DIR_LEFT then
+        if isEmpty(rectSelection(item.x+item.w,item.y,1,4)) then
+            item.distance = item.distance + 1
+            item.w = item.w + 1
+            item.pos = item.pos + tileSize
+        end
+    elseif direction == DIR_RIGHT then
+
+    end
+    setCollision1Way(item)
+end
+
 local function repairBarrier(item)
     local direction = item.direction
     if direction == DIR_UP then
@@ -297,7 +319,7 @@ local specialRepairs = {
     [11] = repairRotator,
     [12] = repairCannon,
     [13] = repairRod,
-    [14] = setCollision1Way,
+    [14] = repair1Way,
     [15] = repairBarrier
 }
 
