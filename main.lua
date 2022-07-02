@@ -17,11 +17,12 @@ require("serialize")
 tileSize = 8
 gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
-condenseEnabled = true
+condenseEnabled = false
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
 purple = {1,0,1} -- rgb
+red = {1,0,0, 0.5} -- rgba
 
 local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
@@ -49,33 +50,57 @@ function table.sum(tbl)
     return sum
 end
 
-local function drawBricks()
-    local numDraws = 0
-    local brickT = brickT
-    local x,y = 1,1
-    while x < levelProps.sizeX do
-        y = 1
-        while y < levelProps.sizeY do
-            curBrick = brickT[x][y]
-            if curBrick[1] > 2 and curBrick[4] == 0 and curBrick[5] == 0 then
-                numDraws = numDraws + 1
-                height = curBrick[3] * 8
-                if curBrick[1] == 7 then
-                    width = curBrick[3] * 8
-                    srcX = 240 + curBrick[2]*curBrick[3]*8
-                    sizeOffsetX = greySumT[curBrick[3]]
-                    sizeOffsetY = greySumT[curBrick[3]]
-                else
-                    width = curBrick[2] * 8
-                    sizeOffsetX = sumT[curBrick[2]]
-                    sizeOffsetY = sumT[curBrick[3]]
-                    srcX = (curBrick[1] - 3) * 48 + sizeOffsetX
-                end
-                drawSprite((x-camPos[1])*8, (y-camPos[2])*8, _, srcX, sizeOffsetY, width, height)
-            end
-            y = y + curBrick[3]-curBrick[5]
+--- render a row of bricks, brute force, fail safe
+local function renderLineHoriz(i,j, drawOffsetY)
+    local startI = i
+    while i<=levelProps.sizeX do
+        local curBrick = brickT[i]
+        if not curBrick then
+            break
         end
-        x = x + 1
+        curBrick = curBrick[j]
+
+        if curBrick[1]>1 then
+            if curBrick[1]>=7 then --concrete
+                drawSprite(
+                    (i -startI) * 8, drawOffsetY,
+                    _,
+                    240+curBrick[2]*curBrick[3]*8,
+                    greySumT[curBrick[3]]+curBrick[5]*8,
+                    8*(curBrick[3]-curBrick[4]),
+                    8*(curBrick[3]-curBrick[5])
+                )
+                i = i + curBrick[3]-curBrick[4]
+            elseif curBrick[1]>=3 then --color
+                drawSprite(
+                    (i -startI) * 8, drawOffsetY,
+                    _,
+                    (curBrick[1]-3)*48+sumT[curBrick[2]]+curBrick[4]*8,
+                    sumT[curBrick[3]]+curBrick[5]*8,
+                    (curBrick[2]-curBrick[4])*8,
+                    (curBrick[3]-curBrick[5])*8
+                )
+                i = i + curBrick[2]-curBrick[4]
+            elseif curBrick[1]==2 then --collision occupied
+                fillRect(
+                    (i -startI) * 8,
+                    drawOffsetY,
+                    (curBrick[2]-curBrick[4])*8,
+                    tileSize,
+                    red
+                )
+                i = i + curBrick[2]-curBrick[4]
+            end
+        else
+            i = i + curBrick[2]-curBrick[4]
+        end
+
+    end
+end
+
+local function drawBricks()
+    for y = camPos[2], levelProps.sizeY do
+        renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
     end
 end
 
@@ -100,9 +125,13 @@ end
 local function optimizeEmptySpace()
     print("--- optimizing empty space")
     for i=1,levelProps.sizeX do
+        local lastBrickType = -1
         local lastJ = -1
         for j=levelProps.sizeY,1,-1 do -- traverse column BACKWARDS
-            if brickT[i][j][1]<3 and j>1 and (lastJ == -1 or lastJ - j < 255) then -- empty space with max height of 254
+            if lastBrickType == -1 and brickT[i][j][1] < 3 then
+                lastBrickType = brickT[i][j][1]
+            end
+            if brickT[i][j][1] == lastBrickType and j>1 and (lastJ == -1 or lastJ - j < 255) then -- empty space with max height of 254
                 if lastJ==-1 then
                     lastJ = j -- set END y of empty space
                 end
@@ -114,6 +143,7 @@ local function optimizeEmptySpace()
                         brickT[i][k][5]=k-(j+1) -- cur Y sub index. 0-based
                     end
                     lastJ=-1
+                    lastBrickType=-1
                 end
             end
 

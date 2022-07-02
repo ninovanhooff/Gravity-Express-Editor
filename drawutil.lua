@@ -26,6 +26,12 @@ function pgeDrawRectoutline(x, y, w, h, color)
     gfx.setColor(white)
 end
 
+function fillRect(x, y, w, h, color)
+    gfx.setColor(color)
+    gfx.rectangle("fill", x, y, w, h)
+    gfx.setColor(white)
+end
+
 function loopAnim(frames,skip)
     return floor((frameCounter % (frames*skip))*(1/skip))
 end

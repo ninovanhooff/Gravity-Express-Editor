@@ -62,6 +62,71 @@ local function repairCannon(item)
     end
 end
 
+local function setCollisionBarrier(item)
+    print("set collision for barrier", item)
+    if item.direction== DIR_UP then
+        for i=0,5 do
+            for j=0,3 do
+                if not (j>1 and i>3) then
+                    brickT[item.x+i][item.y+j+item.distance]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+        if item.endStone==1 then
+            for i = 1,4 do
+                for j =0,1 do
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+    elseif item.direction==DIR_DOWN then
+        for i=0,5 do
+            for j=0,3 do
+                if i>1 or j>1 then
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+        if item.endStone==1 then
+            for i = 1,4 do
+                for j =4+item.distance-2,4+item.distance-1 do
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+    elseif item.direction==DIR_LEFT then
+        for i=0,3 do
+            for j=0,5 do
+                if not (i>1 and j<3) then
+                    brickT[item.x+i+item.distance][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+        if item.endStone==1 then
+            for i=0,1 do
+                for j=1,4 do
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+    else -- DIR_RIGHT
+        for i=0,3 do
+            for j=0,5 do
+                if not (i<2 and j>3) then
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+        if item.endStone==1 then
+            for i=4+item.distance-2,4+item.distance-1 do
+                for j=1,4 do
+                    brickT[item.x+i][item.y+j]={2,1,1,0,0} -- collision occupied
+                end
+            end
+        end
+    end
+end
+
 local function repairBarrier(item)
     local direction = item.direction
     if direction == DIR_UP then
@@ -89,6 +154,7 @@ local function repairBarrier(item)
                 2, 1
             )
     end
+    setCollisionBarrier(item)
 end
 
 local specialRepairs = {
