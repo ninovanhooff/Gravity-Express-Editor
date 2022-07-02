@@ -11,6 +11,15 @@ local DIR_DOWN = 2
 local DIR_LEFT = 3
 local DIR_RIGHT = 4
 
+local function markOccupied(item, coords)
+    clearSelection(rectSelection(
+        item.x+coords[1],
+        item.y+coords[2],
+        coords[3],
+        coords[4]
+    ), true)
+end
+
 local function fillBrickFromSample(sampleX, sampleY, startX, startY, w, h)
     local sample = table.deepGet(brickT, sampleX, sampleY)
     if sample == nil then
@@ -46,6 +55,21 @@ local function repairPlatform(item)
     if overlap then
         item.y = item.y -1
     end
+end
+
+local function repairRotator(item)
+    local coords = {}
+    if item.direction==1 then
+        coords = {0,item.distance,5,8}
+    elseif item.direction==2 then
+        coords = {0,0,5,8}
+    elseif item.direction==3 then
+        coords = {item.distance,0,8,5}
+    else
+        coords = {0,0,8,5}
+    end
+    inspect(coords)
+    markOccupied(item,coords)
 end
 
 local function repairCannon(item)
@@ -242,6 +266,7 @@ end
 
 local specialRepairs = {
     [8] = repairPlatform,
+    [11] = repairRotator,
     [12] = repairCannon,
     [13] = repairRod,
     [14] = setCollision1Way,
