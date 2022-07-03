@@ -105,6 +105,12 @@ local function repairCannon(item)
         if direction == DIR_UP then
             clearSelection(rectSelection(item.x,item.y, 3,3), true) -- receiver
             clearSelection(rectSelection(item.x,item.y+item.h-5, 3,5), true) -- emitter
+            -- fill holes bottom-left emitter
+            fillBrickFromSample(
+                item.x - 2, item.y + item.h - 3,
+                item.x - 1, item.y + item.h - 3,
+                1, 3
+            )
         else
             clearSelection(rectSelection(item.x,item.y, 3,5), true) -- emitter
             clearSelection(rectSelection(item.x,item.y+item.h-3, 3,3), true) -- receiver
@@ -114,9 +120,15 @@ local function repairCannon(item)
         if direction == DIR_RIGHT then
             clearSelection(rectSelection(item.x,item.y, 5,3), true) -- emitter
             clearSelection(rectSelection(item.x+item.w-3,item.y, 3,3), true) -- receiver
-        else
+        else -- DIR_LEFT
             clearSelection(rectSelection(item.x,item.y, 3,3), true) -- receiver
             clearSelection(rectSelection(item.x+item.w-5,item.y, 5,3), true) -- emitter
+            -- fill holes bottom-right emitter
+            fillBrickFromSample(
+                item.x + item.w - 3, item.y -2,
+                item.x +item.w -3, item.y + - 1,
+                3, 1
+            )
         end
         clearSelection(rectSelection(item.x, item.y+1, item.w, 1)) -- cannon ball travel path
     end
