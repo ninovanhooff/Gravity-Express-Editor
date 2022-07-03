@@ -32,9 +32,13 @@ local function fillBrickFromSample(sampleX, sampleY, startX, startY, w, h)
                 local curBrick = table.deepGet(brickT, x, y)
                 if curBrick and curBrick[1] == 0 then
                     brickT[x][y] = { sample[1], 1, 1, 0, 0 } -- 1x1 brick of sampled color
+                else
+                    -- print("non-empty:", curBrick[1])
                 end
             end
         end
+    else
+        -- print("sample test failed")
     end
 end
 
@@ -202,9 +206,11 @@ local function repairRod(item)
     if item.direction==1 then -- horiz
         clearSelection(rectSelection(item.x,item.y, 3,3), true)
         clearSelection(rectSelection(item.x+item.distance,item.y,3,3), true)
+        clearSelection(rectSelection(item.x+3,item.y,item.distance,3), false) -- clear rod path
     elseif item.direction==2 then -- vert
         clearSelection(rectSelection(item.x, item.y,3,3), true)
         clearSelection(rectSelection(item.x,item.y+item.distance,3,3), true)
+        clearSelection(rectSelection(item.x,item.y+3,3,item.distance), false) -- clear rod path
     end
 end
 
@@ -303,23 +309,40 @@ local function repairBarrier(item)
             1, 2
         )
     elseif direction == DIR_DOWN then
-            fillBrickFromSample(
-                item.x + 7, item.y,
-                item.x + 6, item.y,
-                1, 4
-            )
+        fillBrickFromSample(
+            item.x + 7, item.y,
+            item.x + 6, item.y,
+            1, 4
+        )
     elseif direction == DIR_LEFT then
+        fillBrickFromSample(
+            item.x + item.w - 4, item.y + 7,
+            item.x + item.w - 4, item.y + 6,
+            4, 1
+        )
+        if item.endStone == 1 then
+            -- bottom endStone
             fillBrickFromSample(
-                item.x + item.w - 4, item.y + 7,
-                item.x + item.w - 4, item.y + 6,
-                4, 1
-            )
-    elseif direction == DIR_RIGHT then
-            fillBrickFromSample(
-                item.x + 2, item.y + 7,
-                item.x + 2, item.y + 6,
+                item.x, item.y + item.h,
+                item.x, item.y + item.h - 1,
                 2, 1
             )
+        end
+    elseif direction == DIR_RIGHT then
+        -- base
+        fillBrickFromSample(
+            item.x + 2, item.y + 7,
+            item.x + 2, item.y + 6,
+            2, 1
+        )
+        if item.endStone == 1 then
+            -- bottom endStone
+            fillBrickFromSample(
+                item.x + item.w - 1, item.y + item.h,
+                item.x + item.w - 2, item.y + item.h - 1,
+                2, 1
+            )
+        end
     end
     setCollisionBarrier(item)
 end
