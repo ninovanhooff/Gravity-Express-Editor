@@ -44,7 +44,7 @@ end
 
 function table.sum(tbl)
     local sum = 0
-    for i,item in pairs(tbl) do
+    for _,item in pairs(tbl) do
         sum = sum + item
     end
     return sum
@@ -243,8 +243,8 @@ function love.load(args)
         canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
         love.graphics.setCanvas(canvas)
         --print("Frame-----")
-        drawBricks()
         drawSpecials(camPos)
+        drawBricks()
         --print("---- numDraws", numDraws)
         love.graphics.setCanvas()
 
