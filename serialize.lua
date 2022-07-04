@@ -61,3 +61,23 @@ function writeLua( filepath, table_to_export )
 
     file:close()
 end
+
+function writeBrickT(filepath, table_to_export)
+    print("--- writing "..filepath)
+    assert( filepath, "writeBrickT, filepath required")
+    assert( table_to_export, "writeBrickT, table_to_export required")
+
+    local file, file_error = io.open( filepath, "wb")
+    if not file then
+        print("writeLua, Cannot open file ", filepath," (", file_error, ")")
+        return
+    end
+
+    for x, xtem in ipairs(brickT) do
+        for y,ytem in ipairs(xtem.compressed) do
+            file:write(ytem)
+        end
+    end
+
+    file:close()
+end

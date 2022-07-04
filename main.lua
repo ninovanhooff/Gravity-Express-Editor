@@ -5,7 +5,7 @@
 ---
 
 ------ Name without extension
-require("cglReader")
+require("cglBrickReader")
 require("util")
 require("drawutil")
 require("specialsView")
@@ -17,11 +17,12 @@ require("serialize")
 tileSize = 8
 gfxEnabled = true -- when false, no image displayed, but written to file. Useful for commandline-usage
 editorMode = true
-condenseEnabled = true
+condenseEnabled = false
 curX, curY = 1,1
 white = {1,1,1} -- rgb
 yellow = {1,1,0} -- rgb
 purple = {1,0,1} -- rgb
+red = {1,0,0, 0.5} -- rgba
 
 local camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
@@ -43,70 +44,120 @@ end
 
 function table.sum(tbl)
     local sum = 0
-    for i,item in pairs(tbl) do
+    for _,item in pairs(tbl) do
         sum = sum + item
     end
     return sum
 end
 
-local function drawBricks()
-    local numDraws = 0
-    local brickT = brickT
-    local x,y = 1,1
-    while x < levelProps.sizeX do
-        y = 1
-        while y < levelProps.sizeY do
-            curBrick = brickT[x][y]
-            if curBrick[1] > 2 and curBrick[4] == 0 and curBrick[5] == 0 then
-                numDraws = numDraws + 1
-                height = curBrick[3] * 8
-                if curBrick[1] == 7 then
-                    width = curBrick[3] * 8
-                    srcX = 240 + curBrick[2]*curBrick[3]*8
-                    sizeOffsetX = greySumT[curBrick[3]]
-                    sizeOffsetY = greySumT[curBrick[3]]
-                else
-                    width = curBrick[2] * 8
-                    sizeOffsetX = sumT[curBrick[2]]
-                    sizeOffsetY = sumT[curBrick[3]]
-                    srcX = (curBrick[1] - 3) * 48 + sizeOffsetX
-                end
-                drawSprite((x-camPos[1])*8, (y-camPos[2])*8, _, srcX, sizeOffsetY, width, height)
-            end
-            y = y + curBrick[3]-curBrick[5]
+--- render a row of bricks, brute force, fail safe
+local function renderLineHoriz(i,j, drawOffsetY)
+    local startI = i
+    while i<=levelProps.sizeX do
+        local curBrick = brickT[i]
+        if not curBrick then
+            break
         end
-        x = x + 1
+        curBrick = curBrick[j]
+
+        if curBrick[1]>1 then
+            if curBrick[1]>=7 then --concrete
+                drawSprite(
+                    (i -startI) * 8, drawOffsetY,
+                    _,
+                    240+curBrick[2]*curBrick[3]*8,
+                    greySumT[curBrick[3]]+curBrick[5]*8,
+                    8*(curBrick[3]-curBrick[4]),
+                    8*(curBrick[3]-curBrick[5])
+                )
+                i = i + curBrick[3]-curBrick[4]
+            elseif curBrick[1]>=3 then --color
+                drawSprite(
+                    (i -startI) * 8, drawOffsetY,
+                    _,
+                    (curBrick[1]-3)*48+sumT[curBrick[2]]+curBrick[4]*8,
+                    sumT[curBrick[3]]+curBrick[5]*8,
+                    (curBrick[2]-curBrick[4])*8,
+                    (curBrick[3]-curBrick[5])*8
+                )
+                i = i + curBrick[2]-curBrick[4]
+            elseif curBrick[1]==2 then --collision occupied
+                fillRect(
+                    (i -startI) * 8,
+                    drawOffsetY,
+                    (curBrick[2]-curBrick[4])*8,
+                    tileSize,
+                    red
+                )
+                i = i + curBrick[2]-curBrick[4]
+            end
+        else
+            i = i + curBrick[2]-curBrick[4]
+        end
+
+    end
+end
+
+local function drawBricks()
+    for y = camPos[2], levelProps.sizeY do
+        renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
     end
 end
 
 function love.draw()
     drawSpecials(camPos)
     drawBricks()
+    if not love.keyboard.isDown('up', 'down', 'left', 'right') then
+        love.timer.sleep(0.1)
+    end
+
+end
+
+--- replace all non-cencrete bricks by 1x1 tiles, including empty space
+--- in other words, keep only the type([1]), and set sizing values to 1,1,0,0
+local function unOptimize()
+    print("--- unOptimizing")
+    for _, xTem in ipairs(brickT) do
+        for y, yTem in ipairs(xTem) do
+            if yTem[1] < 7 then
+                xTem[y] = {yTem[1], 1, 1, 0, 0}
+            end
+        end
+    end
 end
 
 local function optimizeEmptySpace()
+    print("--- optimizing empty space")
     for i=1,levelProps.sizeX do
+        local lastBrickType = -1
         local lastJ = -1
-        for j=levelProps.sizeY,1,-1 do
-            if brickT[i][j][1]<3 and j>1 then -- empty space
+        for j=levelProps.sizeY,1,-1 do -- traverse column BACKWARDS
+            if lastBrickType == -1 and brickT[i][j][1] < 3 then
+                lastBrickType = brickT[i][j][1]
+            end
+            if brickT[i][j][1] == lastBrickType and j>1 and (lastJ == -1 or lastJ - j < 255) then -- empty space with max height of 254
                 if lastJ==-1 then
-                    lastJ = j
+                    lastJ = j -- set END y of empty space
                 end
             else -- always for j==1
                 if lastJ~=-1 then
                     for k=j+1,lastJ do
                         --brickT[i][k][4]=lastJ-j
                         brickT[i][k][3]=lastJ-j -- h
-                        brickT[i][k][5]=k-(j+1)
+                        brickT[i][k][5]=k-(j+1) -- cur Y sub index. 0-based
                     end
                     lastJ=-1
+                    lastBrickType=-1
                 end
             end
+
         end
     end
+    -- todo horizontal direction too? then maybe we need purely column / row based drawing. not the "fast" approach
 end
 
 local function condenseBricks()
+    print("--- condensing bricks")
     --local brickTypeBU = selBrickType
     --xBU,yBU,curX,curY = curX,curY,1,1
     for color = 3,6 do
@@ -141,13 +192,14 @@ function love.load(args)
     local fileName = args[1]
     print("Filename", fileName)
 
-    -- READ INPUT
+    -- READ INPUT FILE from args
     if args[2] == "lua" then
         print("Reading Gravity Express format")
         local levelT = require("lua-levels/" .. fileName)
         specialT = levelT.specialT
         levelProps = levelT.levelProps
         brickT = levelT.brickT
+        unOptimize()
     else
         print("Converting cgl + intermediate lua result from cgl reader")
         levelT = require("intermediates/" .. fileName .. "_intermediate")
@@ -156,24 +208,31 @@ function love.load(args)
         brickT = {}
 
         brickT = readCglBrickT(fileName)
+        unOptimize()
 
         assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
         assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
         repairSpecials()
-        if condenseEnabled then
-            condenseBricks()
-        end
-        optimizeEmptySpace()
     end
+
+    if condenseEnabled then
+        condenseBricks()
+    end
+    optimizeEmptySpace()
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
 
+    table.compress(brickT)
+
     -- FILE WRITE
-    writeLua("lua-levels/" .. fileName .. ".lua", {
+    local luaFilePath = "lua-levels/" .. fileName .. ".lua"
+    print("--- writing ".. luaFilePath)
+    writeLua(luaFilePath, {
         levelProps = levelProps,
-        specialT = specialT,
-        brickT = brickT,
+        specialT = specialT
     })
+
+    writeBrickT("lua-levels/" .. fileName .. ".bin", brickT)
 
     -- IMAGE OUT
     if gfxEnabled then
@@ -184,8 +243,8 @@ function love.load(args)
         canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
         love.graphics.setCanvas(canvas)
         --print("Frame-----")
-        drawBricks()
         drawSpecials(camPos)
+        drawBricks()
         --print("---- numDraws", numDraws)
         love.graphics.setCanvas()
 
