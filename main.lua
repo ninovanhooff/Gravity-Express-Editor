@@ -5,7 +5,7 @@
 ---
 
 ------ Name without extension
-require("cglReader")
+require("cglBrickReader")
 require("util")
 require("drawutil")
 require("specialsView")
