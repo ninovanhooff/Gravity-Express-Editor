@@ -184,9 +184,27 @@ local function condenseBricks()
     --RenderEditor()
 end
 
+local function readBinaryBrickT(fileName)
+    print("Reading brickT from bin file")
+    local packFormat = levelProps.packFormat
+    local packSize = love.data.getPackedSize(packFormat)
+    local brickFile = io.open("lua-levels/"..fileName..".bin", "rb")
+    local tile
+    brickT = {}
+    for x = 1, levelProps.sizeX do
+        brickT[x] = {}
+        for y = 1, levelProps.sizeY do
+            tile = { love.data.unpack(packFormat, brickFile:read(packSize)) }
+            table.remove(tile) -- remove the extra positional element returned by unpack
+            brickT[x][y] = tile
+        end
+    end
+end
+
 function love.load(args)
     love.keyboard.setKeyRepeat( true )
     sprite = love.graphics.newImage("sprite.png")
+    print("sprite", sprite)
     frameCounter = 0
 
     local fileName = args[1]
@@ -199,6 +217,11 @@ function love.load(args)
         specialT = levelT.specialT
         levelProps = levelT.levelProps
         brickT = levelT.brickT
+        if not brickT then
+            readBinaryBrickT(fileName)
+        else
+            print("brickT read from lua file")
+        end
         unOptimize()
     else
         print("Converting cgl + intermediate lua result from cgl reader")
