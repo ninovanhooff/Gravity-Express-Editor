@@ -10,18 +10,19 @@ function table.compress(tbl)
     levelProps.packFormat = format
     for x, xtem in ipairs(tbl) do
         for y,ytem in ipairs(xtem) do
+            -- unpack refers to table.unpack; which returns table entries as extra arguments (vararg)
             xtem[y]=love.data.pack("string", format, unpack(ytem))
         end
     end
 
     for x, xtem in ipairs(tbl) do
-        local meta = {compressed = xtem}
+        local compressedColumn = { compressed = xtem}
         local unpackMeta = {
             __index = function(tbl, idx)
                 return {love.data.unpack(format, tbl.compressed[idx])}
                 -- note will have extra index for string index of next byte
             end
         }
-        tbl[x]= setmetatable(meta, unpackMeta)
+        tbl[x]= setmetatable(compressedColumn, unpackMeta)
     end
 end
