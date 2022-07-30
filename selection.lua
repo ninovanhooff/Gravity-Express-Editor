@@ -4,8 +4,11 @@
 --- DateTime: 02/07/2022 21:48
 ---
 
+local min = math.min
+
 function isEmpty(selection)
     for _,item in ipairs(selection) do
+        inspect(item)
         if table.deepGet(brickT, item[1], item[2])[1]>=3 then
             return false
         end
@@ -14,7 +17,13 @@ function isEmpty(selection)
 end
 
 function rectSelection(x,y,w,h)
+    w = min(levelProps.sizeX - x + 1, w)
+    h = min(levelProps.sizeY - y + 1, h)
     local selection = {}
+    if w < 1 or h < 1 then
+        print("WARN empty selection")
+        return selection
+    end
     for i = x,x+w-1 do
         for j = y, y+h-1 do
             table.insert(selection, {i,j})
