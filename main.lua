@@ -4,6 +4,8 @@
 --- DateTime: 13/05/2022 16:58
 ---
 
+lume = require "lume"
+
 ------ Name without extension
 require("cglBrickReader")
 require("util")
@@ -28,9 +30,8 @@ yellow = {1,1,0} -- rgb
 purple = {1,0,1} -- rgb
 red = {1,0,0, 0.5} -- rgba
 
-local camPos = {1,1,0,0}
+camPos = {1,1,0,0}
 local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
-local canvas
 
 -- barrier key color names
 colorT = {"red","green","blue","yellow"}
@@ -158,7 +159,7 @@ function love.load(args)
     -- READ INPUT FILE from args
     if not fileName then
         print("Creating new level")
-        InitEditor(60,60)
+        InitEditor(600,60)
         local displayIdx = 1
         love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
         love.window.setPosition(20,20, displayIdx)
@@ -211,7 +212,7 @@ function love.load(args)
 
         -- IMAGE OUT
         if not gfxEnabled then
-            canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
+            local canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
             love.graphics.setCanvas(canvas)
             --print("Frame-----")
             drawSpecials(camPos)
@@ -228,8 +229,12 @@ function love.load(args)
 end
 
 function love.update(dt)
-    curX = (floor(love.mouse.getX() / tileSize)) + camPos[1]
-    curY = (floor(love.mouse.getY() / tileSize)) + camPos[2]
+    curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
+    curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
+
+    curX = lume.clamp(curX, 1, levelProps.sizeX - brushSize + 1)
+    curY = lume.clamp(curY, 1, levelProps.sizeY - brushSize + 1)
+
     if love.mouse.isDown(1) then
         fillBrush()
     end
