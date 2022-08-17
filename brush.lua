@@ -91,3 +91,17 @@ function emptyBrush(brush)
     end
     clearSelection(selection)
 end
+
+function SquareBrush(w)
+    local brushT = {}
+    for i = 0,w-1 do
+        for j = 0,w-1 do
+            table.insert(brushT,{i,j})
+            printf("SquareBrush",i,j)
+        end
+    end
+    BrushType = SquareBrush
+    brushVerts = {{white,0,0,0},{white,w*8,0,0},{white,w*8,w*8,0},{white,0,w*8,50},{white,0,0,0}}
+    brushSize = w
+    return brushT
+end

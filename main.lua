@@ -11,7 +11,11 @@ require("drawutil")
 require("specialsView")
 require("specialsRepair")
 require("brush")
+require("levelGenerator")
+require("EditorView")
 require("serialize")
+
+local floor = math.floor
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8
@@ -50,67 +54,8 @@ function table.sum(tbl)
     return sum
 end
 
---- render a row of bricks, brute force, fail safe
-local function renderLineHoriz(i,j, drawOffsetY)
-    local startI = i
-    while i<=levelProps.sizeX do
-        local curBrick = brickT[i]
-        if not curBrick then
-            break
-        end
-        curBrick = curBrick[j]
-
-        if curBrick[1]>1 then
-            if curBrick[1]>=7 then --concrete
-                drawSprite(
-                    (i -startI) * 8, drawOffsetY,
-                    _,
-                    240+curBrick[2]*curBrick[3]*8,
-                    greySumT[curBrick[3]]+curBrick[5]*8,
-                    8*(curBrick[3]-curBrick[4]),
-                    8*(curBrick[3]-curBrick[5])
-                )
-                i = i + curBrick[3]-curBrick[4]
-            elseif curBrick[1]>=3 then --color
-                drawSprite(
-                    (i -startI) * 8, drawOffsetY,
-                    _,
-                    (curBrick[1]-3)*48+sumT[curBrick[2]]+curBrick[4]*8,
-                    sumT[curBrick[3]]+curBrick[5]*8,
-                    (curBrick[2]-curBrick[4])*8,
-                    (curBrick[3]-curBrick[5])*8
-                )
-                i = i + curBrick[2]-curBrick[4]
-            elseif curBrick[1]==2 then --collision occupied
-                fillRect(
-                    (i -startI) * 8,
-                    drawOffsetY,
-                    (curBrick[2]-curBrick[4])*8,
-                    tileSize,
-                    red
-                )
-                i = i + curBrick[2]-curBrick[4]
-            end
-        else
-            i = i + curBrick[2]-curBrick[4]
-        end
-
-    end
-end
-
-local function drawBricks()
-    for y = camPos[2], levelProps.sizeY do
-        renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
-    end
-end
-
 function love.draw()
-    drawSpecials(camPos)
-    drawBricks()
-    if not love.keyboard.isDown('up', 'down', 'left', 'right') then
-        love.timer.sleep(0.1)
-    end
-
+    drawEditor()
 end
 
 --- replace all non-cencrete bricks by 1x1 tiles, including empty space
@@ -211,7 +156,13 @@ function love.load(args)
     print("Filename", fileName)
 
     -- READ INPUT FILE from args
-    if args[2] == "lua" then
+    if not fileName then
+        print("Creating new level")
+        InitEditor(60,60)
+        local displayIdx = 1
+        love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
+        love.window.setPosition(20,20, displayIdx)
+    elseif args[2] == "lua" then
         print("Reading Gravity Express format")
         local levelT = require("lua-levels/" .. fileName)
         specialT = levelT.specialT
@@ -238,44 +189,50 @@ function love.load(args)
         repairSpecials()
     end
 
-    if condenseEnabled then
-        condenseBricks()
-    end
-    optimizeEmptySpace()
-
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
 
-    table.compress(brickT)
+    if (fileName) then
 
-    -- FILE WRITE
-    local luaFilePath = "lua-levels/" .. fileName .. ".lua"
-    print("--- writing ".. luaFilePath)
-    writeLua(luaFilePath, {
-        levelProps = levelProps,
-        specialT = specialT
-    })
+        if condenseEnabled then
+            condenseBricks()
+        end
+        optimizeEmptySpace()
 
-    writeBrickT("lua-levels/" .. fileName .. ".bin", brickT)
+        table.compress(brickT)
+        -- FILE WRITE
+        local luaFilePath = "lua-levels/" .. fileName .. ".lua"
+        print("--- writing ".. luaFilePath)
+        writeLua(luaFilePath, {
+            levelProps = levelProps,
+            specialT = specialT
+        })
 
-    -- IMAGE OUT
-    if gfxEnabled then
-        local displayIdx = 2
-        love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
-        love.window.setPosition(20,20, displayIdx)
-    else
-        canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
-        love.graphics.setCanvas(canvas)
-        --print("Frame-----")
-        drawSpecials(camPos)
-        drawBricks()
-        --print("---- numDraws", numDraws)
-        love.graphics.setCanvas()
+        writeBrickT("lua-levels/" .. fileName .. ".bin", brickT)
 
-        love.filesystem.setIdentity( "GravityExpressEditor" )
-        canvas:newImageData():encode("png",fileName .. ".png")
-        love.event.quit()
+        -- IMAGE OUT
+        if not gfxEnabled then
+            canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
+            love.graphics.setCanvas(canvas)
+            --print("Frame-----")
+            drawSpecials(camPos)
+            drawBricks()
+            --print("---- numDraws", numDraws)
+            love.graphics.setCanvas()
+
+            love.filesystem.setIdentity( "GravityExpressEditor" )
+            canvas:newImageData():encode("png",fileName .. ".png")
+            love.event.quit()
+        end
     end
 
+end
+
+function love.update(dt)
+    curX = (floor(love.mouse.getX() / tileSize)) + camPos[1]
+    curY = (floor(love.mouse.getY() / tileSize)) + camPos[2]
+    if love.mouse.isDown(1) then
+        fillBrush()
+    end
 end
 
 function love.keypressed(key, _, _)

@@ -10,6 +10,12 @@ function boolToNum(bool)
     if bool then return 1 else return 0 end
 end
 
+function printf(...)
+    if Debug then
+        print(unpack(arg))
+    end
+end
+
 function ends_with(str, ending)
     return ending == "" or str:sub(-#ending) == ending
 end
