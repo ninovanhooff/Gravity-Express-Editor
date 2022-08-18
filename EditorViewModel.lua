@@ -7,6 +7,7 @@
 require("object")
 
 
+local mouse = love.mouse
 local floor = math.floor
 local min = math.min
 sideBarWidth = 100
@@ -23,17 +24,38 @@ function EditorViewModel:init()
 end
 
 function EditorViewModel:update()
-    curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
-    curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
-
-    checkX()
-    checkY()
-
     if love.mouse.isDown(1) then
         fillBrush()
     elseif love.mouse.isDown(2) then
         emptyBrush()
     end
+
+    if love.mouse.isDown(3) then -- middle mouse button
+        if not self.isPanning then
+            self.panStart = {
+                mouseX = love.mouse.getX(),
+                mouseY = love.mouse.getY(),
+                camX = camPos[1],
+                camY = camPos[2]
+            }
+            self.isPanning = true
+        else
+            local panX = floor((mouse.getX() - self.panStart.mouseX)/tileSize)
+            local panY = floor((mouse.getY() - self.panStart.mouseY)/tileSize)
+            camPos[1] = self.panStart.camX - panX
+            camPos[2] = self.panStart.camY - panY
+        end
+    else
+        if self.isPanning then
+            self.isPanning = false
+        else
+            curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
+            curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
+        end
+    end
+
+    checkX()
+    checkY()
 end
 
 function editorSizeX()
