@@ -74,5 +74,5 @@ function drawEditor()
         love.timer.sleep(0.1)
     end
     -- brush cursor
-    pgeDrawRectoutline((curX - camPos[1]) * tileSize, (curY - camPos[2])*tileSize, tileSize*brushSize, tileSize*brushSize, yellow)
+    drawBrush()
 end

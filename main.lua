@@ -159,7 +159,7 @@ function love.load(args)
     -- READ INPUT FILE from args
     if not fileName then
         print("Creating new level")
-        InitEditor(600,60)
+        InitEditor(60,60)
         local displayIdx = 1
         love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
         love.window.setPosition(20,20, displayIdx)
@@ -237,6 +237,8 @@ function love.update(dt)
 
     if love.mouse.isDown(1) then
         fillBrush()
+    elseif love.mouse.isDown(2) then
+        emptyBrush()
     end
 end
 

@@ -105,3 +105,28 @@ function SquareBrush(w)
     brushSize = w
     return brushT
 end
+
+function CircleBrush(w) -- width
+    local r = math.floor(w*0.5)
+    local hw = r+0.5
+    local brushT = {}
+    brushVerts = {}
+    for j=r,-r,-1 do
+        local lr = math.floor(math.sqrt(r*r-j*j))
+        --table.insert(brushVerts,{white,(r-lr)*8,(r-j)*8,0})
+
+        table.insert(brushVerts,{white,(r+lr+1)*8,(r-j)*8,0}) -- right
+        table.insert(brushVerts,{white,(r+lr+1)*8,(r-j+1)*8,0}) -- right
+        table.insert(brushVerts,1,{white,(r-lr)*8,(r-j)*8,0}) -- left
+        table.insert(brushVerts,1,{white,(r-lr)*8,(r-j+1)*8,0}) -- left
+        printf("lr",lr)
+        for i=r-lr,r+lr do
+            table.insert(brushT,{i,r-j})
+            printf("circbrushW",i,r-j)
+        end
+    end
+    table.insert(brushVerts,brushVerts[1]) -- cap bottom
+    BrushType = CircleBrush
+    brushSize = w
+    return brushT
+end

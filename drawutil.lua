@@ -8,8 +8,6 @@ local floor = math.floor
 local gfx  = love.graphics
 
 local quadCache = {}
-
-
 function drawSprite(x,y,_,srcX,srcY,w,h)
     local cacheKey = "" .. srcX .. srcY .. w ..h
     local quad = quadCache[cacheKey]
@@ -18,6 +16,32 @@ function drawSprite(x,y,_,srcX,srcY,w,h)
         quadCache[cacheKey] = quad
     end
     gfx.draw(sprite, quad, x, y)
+end
+
+function curXScreen()
+    return (curX - camPos[1]) * tileSize
+end
+
+function curYScreen()
+    return (curY - camPos[2]) * tileSize
+end
+
+function drawBrush()
+    -- Defining a table with the coordinates.
+    -- This table could be built incrementally too.
+    local vertices = {}
+    local curXScreen = curXScreen()
+    local curYScreen = curYScreen()
+    for i,item in ipairs(brushVerts) do
+        if i<#brushVerts then -- polygon should NOT be closed, so ignore the last, closing vertex
+            -- [1]: color, [2]: x, [3]: y
+            table.insert(vertices, item[2] + curXScreen)
+            table.insert(vertices, item[3] + curYScreen)
+        end
+    end
+
+    -- Passing the table to the function as a second argument.
+    love.graphics.polygon("line", vertices)
 end
 
 function pgeDrawRectoutline(x, y, w, h, color)
