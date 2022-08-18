@@ -11,6 +11,7 @@ local mouse = love.mouse
 local floor = math.floor
 local min = math.min
 sideBarWidth = 100
+sideBarHeight = 600
 
 class("EditorViewModel").extends()
 
@@ -97,18 +98,3 @@ function checkY()
         curY = levelProps.sizeY-brushSize+1
     end
 end
-
---function checkY()
---    local editorSizeY = editorSizeY()
---
---    if curY<1 then curY = 1 end
---    if camPos[2]<1 then camPos[2] = 1 end
---
---    if curY>=levelProps.sizeY-brushSize then
---        curY = levelProps.sizeY-brushSize+1
---    end
---    if curY<camPos[2] then curY = camPos[2] end
---    if camPos[2]+editorSizeY -1>levelProps.sizeY or curY+brushSize>camPos[2]+editorSizeY then
---        camPos[2] = curY+brushSize-editorSizeY
---    end
---end

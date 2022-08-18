@@ -65,7 +65,8 @@ function renderLineHoriz(i,j, drawOffsetY)
 end
 
 function drawBricks()
-    for y = camPos[2], levelProps.sizeY do
+    local endY = min(levelProps.sizeY, camPos[2]+editorSizeY())
+    for y = camPos[2], endY do
         renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
     end
 end
@@ -75,9 +76,9 @@ function drawEditor()
     fillCheckerBoard()
     drawSpecials(camPos)
     drawBricks()
-    if not love.keyboard.isDown('up', 'down', 'left', 'right') then
-        love.timer.sleep(0.1)
-    end
+    --if not love.keyboard.isDown('up', 'down', 'left', 'right') then
+    --    love.timer.sleep(0.1)
+    --end
     -- brush cursor
     drawBrush()
     gfx.setScissor()
