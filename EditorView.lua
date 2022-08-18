@@ -11,12 +11,11 @@ require("specialsView")
 local floor = math.floor
 local min = math.min
 local gfx  = love.graphics
-local sideBarWidth = 100
 
 --- render a row of bricks, brute force, fail safe
 function renderLineHoriz(i,j, drawOffsetY)
     local startI = i
-    local endI = min(levelProps.sizeX, camPos[1] + editorSizeX())
+    local endI = min(levelProps.sizeX, camPos[1] + editorSizeX()-1)
     while i<=endI do
         local curBrick = brickT[i]
         if not curBrick then
@@ -72,8 +71,8 @@ function drawBricks()
 end
 
 function drawEditor()
+    gfx.setScissor(0,0,editorSizeX()*tileSize, editorSizeY()*tileSize)
     fillCheckerBoard()
-
     drawSpecials(camPos)
     drawBricks()
     if not love.keyboard.isDown('up', 'down', 'left', 'right') then
@@ -81,4 +80,5 @@ function drawEditor()
     end
     -- brush cursor
     drawBrush()
+    gfx.setScissor()
 end

@@ -8,9 +8,11 @@ local checkerImage = love.graphics.newImage("images/checkerboard.png")
 checkerImage:setWrap("repeat", "repeat")
 
 function fillCheckerBoard()
+    local sizeX = math.min(editorSizeX(), levelProps.sizeX)*tileSize
+    local sizeY = math.min(editorSizeY(), levelProps.sizeY)*tileSize
     checkerQuad = love.graphics.newQuad( 0,0,
-        love.graphics.getWidth(),love.graphics.getHeight(),
-        16,16
+        sizeX,sizeY,
+        checkerImage:getDimensions()
     )
     love.graphics.draw(checkerImage, checkerQuad, 0,0, 0, 1,1)
 
