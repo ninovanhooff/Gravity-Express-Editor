@@ -15,6 +15,7 @@ require("specialsRepair")
 require("brush")
 require("levelGenerator")
 require("EditorView")
+require("EditorViewModel")
 require("serialize")
 
 local floor = math.floor
@@ -161,7 +162,7 @@ function love.load(args)
         print("Creating new level")
         InitEditor(60,60)
         local displayIdx = 1
-        love.window.setMode(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
+        love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1} )
         love.window.setPosition(20,20, displayIdx)
     elseif args[2] == "lua" then
         print("Reading Gravity Express format")
@@ -229,27 +230,9 @@ function love.load(args)
 end
 
 function love.update(dt)
-    curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
-    curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
-
-    curX = lume.clamp(curX, 1, levelProps.sizeX - brushSize + 1)
-    curY = lume.clamp(curY, 1, levelProps.sizeY - brushSize + 1)
-
-    if love.mouse.isDown(1) then
-        fillBrush()
-    elseif love.mouse.isDown(2) then
-        emptyBrush()
-    end
+    editorViewModel:update()
 end
 
 function love.keypressed(key, _, _)
-    if key == "left" and camPos[1] > 1 then
-        camPos[1] = camPos[1] - 1
-    elseif key == "up" and camPos[2] > 1 then
-        camPos[2] = camPos[2] - 1
-    elseif key == "right" then
-        camPos[1] = camPos[1] + 1
-    elseif key == "down" then
-        camPos[2] = camPos[2] + 1
-    end
+
 end

@@ -9,17 +9,23 @@ require("specialsView")
 
 
 local floor = math.floor
+local min = math.min
 local gfx  = love.graphics
+local sideBarWidth = 100
 
 --- render a row of bricks, brute force, fail safe
 function renderLineHoriz(i,j, drawOffsetY)
     local startI = i
-    while i<=levelProps.sizeX do
+    local endI = min(levelProps.sizeX, camPos[1] + editorSizeX())
+    while i<=endI do
         local curBrick = brickT[i]
         if not curBrick then
             break
         end
         curBrick = curBrick[j]
+        if not curBrick then
+            break
+        end
 
         if curBrick[1]>1 then
             if curBrick[1]>=7 then --concrete
