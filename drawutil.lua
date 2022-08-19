@@ -7,6 +7,13 @@
 local floor = math.floor
 local gfx  = love.graphics
 
+black = {0,0,0} -- rgb
+white = {1,1,1} -- rgb
+semiWhite = {1, 1, 1, 0.5}
+yellow = {1,1,0} -- rgb
+purple = {1,0,1} -- rgb
+red = {1,0,0, 0.5} -- rgba
+
 local quadCache = {}
 function drawSprite(x,y,_,srcX,srcY,w,h)
     local cacheKey = "" .. srcX .. srcY .. w ..h

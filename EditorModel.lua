@@ -8,6 +8,12 @@ sumT = {0,8,24}
 greySumT = {-1,56,32,0} -- -1:unused
 greyMaxT = {-1,9,8,5}
 pltfrmClrCoord = {300}
+-- barrier key color names
+colorT = {"red","green","blue","yellow"}
+keys = {true,true,true,true} -- make the barrier colors always lit
+-- brickT constants
+greyVariations = {-1, 11, 7 , 5}
+
 
 specialDefs = {}
 specialDefs[8] = {sType=8,pType=1,w=16,h=6,amnt=0,arrows=1} -- refactor: platform. pType = platform type.

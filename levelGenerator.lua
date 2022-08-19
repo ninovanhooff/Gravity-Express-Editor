@@ -18,9 +18,9 @@ function InitEditor(w,h)
         end
         table.insert(brickT,tempCol)
     end
-    brushSize = 8
+    brushSize = 1
     curBrush = SquareBrush(brushSize)
-    selBrickType = 5
+    selBrickType = 8
     changed = false
     frameCounter = 1
     keys = {true,true,true,true} -- make the barrier colors always lit

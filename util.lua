@@ -55,3 +55,11 @@ function table.deepGet(tbl, ...)
     end
     return result
 end
+
+function Trunc_Zeros(num,precision)
+    local precision = precision or 2
+    local numString = string.format("%0."..precision.."f",num)
+    local result = numString:gsub("%.?0+$","",1)
+    --printf(result)
+    return result
+end

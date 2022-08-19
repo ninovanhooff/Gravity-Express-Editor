@@ -6,17 +6,21 @@
 
 lume = require "lume"
 
------- Name without extension
+-- Name without extension
+require("object")
 require("cglBrickReader")
 require("util")
 require("drawutil")
 require("specialsView")
 require("specialsRepair")
+require("specialsChange")
 require("brush")
 require("levelGenerator")
 require("EditorModel")
 require("EditorView")
 require("EditorViewModel")
+require("MenuView")
+require("MenuViewModel")
 require("serialize")
 
 local floor = math.floor
@@ -27,21 +31,11 @@ gfxEnabled = true -- when false, no image displayed, but written to file. Useful
 editorMode = true
 condenseEnabled = false
 curX, curY = 1,1
-white = {1,1,1} -- rgb
-yellow = {1,1,0} -- rgb
-purple = {1,0,1} -- rgb
-red = {1,0,0, 0.5} -- rgba
+
 
 camPos = {1,1,0,0}
-local blockNames = {"Red","Yellow","Blue","Green","Grey","Platform","Blower","Magnet","Rotator","Cannon","Rod","1-way","Barrier"}
 
--- barrier key color names
-colorT = {"red","green","blue","yellow"}
-keys = {true,true,true,true} -- make the barrier colors always lit
--- brickT constants
-sumT = {0,8,24}
-greySumT = {-1,56,32,0} -- -1:unused
-greyVariations = {-1, 11, 7 , 5}
+local menuViewModel, menuView
 
 function inspect(tbl)
     for i,item in pairs(tbl) do
@@ -59,6 +53,10 @@ end
 
 function love.draw()
     drawEditor()
+
+    if menuView then
+        menuView:draw()
+    end
 end
 
 --- replace all non-cencrete bricks by 1x1 tiles, including empty space
@@ -238,9 +236,22 @@ function love.load(args)
 end
 
 function love.update(dt)
-    editorViewModel:update()
-    if dt < 1/30 then
-        love.timer.sleep(1/30 - dt)
+    local targetFrameTime = 1/30
+    if not menuViewModel then
+        menuViewModel = editorViewModel:update()
+        if menuViewModel then
+            menuView = MenuView(menuViewModel)
+        end
+    end
+
+    if dt < targetFrameTime then
+        love.timer.sleep(targetFrameTime - dt)
+    end
+end
+
+function love.keypressed(key)
+    if menuViewModel then
+        menuViewModel:keypressed(key)
     end
 end
 

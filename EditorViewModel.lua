@@ -4,9 +4,6 @@
 --- DateTime: 18/08/2022 22:56
 ---
 
-require("object")
-
-
 local sleep = love.timer.sleep
 local mouse = love.mouse
 local floor = math.floor
@@ -23,6 +20,7 @@ function EditorViewModel:init()
     EditorViewModel.super.init()
 end
 
+-- may return menu specs to display
 function EditorViewModel:update()
     if love.keyboard.isDown(".") then
         -- change brush
@@ -62,14 +60,14 @@ function EditorViewModel:update()
     end
 
     if love.mouse.isDown(1) then
-        self:applyBrush()
+        return self:applyBrush()
     elseif love.mouse.isDown(2) then
         if selBrickType < 8 then
             emptyBrush()
         else
-            local foundIdx = SpecialCollision(curX,curY)
-            if foundIdx then
-                table.remove(specialT,foundIdx)
+            local curOidxx = SpecialCollision(curX,curY)
+            if curOidxx then
+                table.remove(specialT,curOidxx)
             end
         end
     end
@@ -139,6 +137,7 @@ function EditorViewModel:wheelMoved(_,y)
     end
 end
 
+-- may return a menu spec to display
 function EditorViewModel:applyBrush()
     if selBrickType < 7 then -- colors
         fillBrush(0)
@@ -165,10 +164,38 @@ function EditorViewModel:applyBrush()
         printf("done concrete")
     else
         -- special
-        occupied = SpecialCollision(curX,curY)
+        curOidx = SpecialCollision(curX,curY)
         local tempT = deepcopy(specialDefs[selBrickType])
 
-        if occupied==false then
+        if curOidx then
+            -- show menu where user edits a special object
+            curO = deepcopy(specialT[curOidx])
+            if curO then
+                local curList = deepcopy(specialVars[curO.sType])
+                table.insert(curList,1,{"x",1,levelProps.sizeX})
+                table.insert(curList,2,{"y",1,levelProps.sizeY})
+                for i,item in ipairs(curList) do
+                    item.val = curO[item[1]]
+                end
+                if curO.sType==8 then -- platform, load pType specific vals
+                    for i,item in ipairs(pltfrmDefs[curO.pType]) do
+                        table.insert(curList,item)
+                        curList[#curList].val = curO[item[1]]
+                    end
+                end
+                local changeFunc = changeFuncs[curO.sType-7]
+                if not changeFunc then
+                    error("no changeFunc for sType" .. curO.sType)
+                end
+                return MenuViewModel(
+                    blockNames[curO.sType],
+                    curList,
+                    changeFunc,
+                    curOidx
+                )
+            end
+        else
+            -- create new
             --if curX+specialDefs[selBrickType].w-1<=levelProps.sizeX and curY+specialDefs[selBrickType].h-1<=levelProps.sizeY then
             tempT.x,tempT.y = curX,curY
             table.insert(specialT,tempT)
@@ -177,8 +204,6 @@ function EditorViewModel:applyBrush()
             --else
             --editorStatusMsg="Not inside level bounds, enlarge level"
             --end
-        else
-            editorStatusMsg = "Overlap with another object"
         end
     end
 end
