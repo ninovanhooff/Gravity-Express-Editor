@@ -231,6 +231,9 @@ end
 
 function love.update(dt)
     editorViewModel:update()
+    if dt < 1/30 then
+        love.timer.sleep(1/30 - dt)
+    end
 end
 
 function love.wheelmoved(x, y)
