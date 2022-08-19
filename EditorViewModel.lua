@@ -118,7 +118,7 @@ function checkX() --whether curX and camPos[1] are in bounds
 
     if curX<camPos[1] then curX = camPos[1] end
     if curX>levelProps.sizeX-brushSize then
-        curX = levelProps.sizeX-brushSize
+        curX = levelProps.sizeX-brushSize+1
     end
 
 end
@@ -133,6 +133,6 @@ function checkY()
 
     if curY<camPos[2] then curY = camPos[2] end
     if curY>levelProps.sizeY-brushSize then
-        curY = levelProps.sizeY-brushSize
+        curY = levelProps.sizeY-brushSize+1
     end
 end
