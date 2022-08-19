@@ -232,3 +232,7 @@ end
 function love.update(dt)
     editorViewModel:update()
 end
+
+function love.wheelmoved(x, y)
+    editorViewModel:wheelMoved(x,y)
+end

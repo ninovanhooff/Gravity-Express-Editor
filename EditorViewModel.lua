@@ -59,6 +59,44 @@ function EditorViewModel:update()
     checkY()
 end
 
+function EditorViewModel:wheelMoved(_,y)
+    if y < 0 then
+        -- decrease brush size
+        if brushSize>1 and (selBrickType~=7 or brushSize>2) then
+            brushSize = brushSize - 1
+            if BrushType == CircleBrush then brushSize = brushSize-1 end
+            if brushSize==0 then --circle brush
+                curBrush = SquareBrush(1)
+                brushSize = 1
+                BrushType = CircleBrush
+            else
+                curBrush = BrushType(brushSize)
+            end
+            if curX>levelProps.sizeX-brushSize then
+                curX = levelProps.sizeX-brushSize
+            end
+
+            if curY>levelProps.sizeY-brushSize then
+                curY = levelProps.sizeY-brushSize
+            end
+        end
+    elseif y > 0 then
+        -- increase brush size
+        if brushSize<30 and (selBrickType~=7 or brushSize<4) then
+            brushSize = brushSize + 1
+            if BrushType == CircleBrush then brushSize = brushSize+1 end
+            curBrush = BrushType(brushSize)
+            print(curX,brushSize,levelProps.sizeX)
+            if curX+brushSize>levelProps.sizeX then
+                curX = levelProps.sizeX-brushSize+1
+            end
+            if curY+brushSize>levelProps.sizeY then
+                curY = levelProps.sizeY-brushSize+1
+            end
+        end
+    end
+end
+
 function editorSizeX()
     -- reserve width for side
     local width = love.window.getMode() --- first return value is width
