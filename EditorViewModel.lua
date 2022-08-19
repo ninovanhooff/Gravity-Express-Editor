@@ -26,7 +26,7 @@ end
 
 function EditorViewModel:update()
     if love.mouse.isDown(1) then
-        fillBrush()
+        fillBrush(0)
     elseif love.mouse.isDown(2) then
         emptyBrush()
     end
@@ -79,8 +79,8 @@ function checkX() --whether curX and camPos[1] are in bounds
     if camPos[1]<1 then camPos[1]=1 end
 
     if curX<camPos[1] then curX = camPos[1] end
-    if curX>=levelProps.sizeX-brushSize then
-        curX = levelProps.sizeX-brushSize+1
+    if curX>levelProps.sizeX-brushSize then
+        curX = levelProps.sizeX-brushSize
     end
 
 end
@@ -94,7 +94,7 @@ function checkY()
     if camPos[2]<1 then camPos[2]=1 end
 
     if curY<camPos[2] then curY = camPos[2] end
-    if curY>=levelProps.sizeY-brushSize then
-        curY = levelProps.sizeY-brushSize+1
+    if curY>levelProps.sizeY-brushSize then
+        curY = levelProps.sizeY-brushSize
     end
 end

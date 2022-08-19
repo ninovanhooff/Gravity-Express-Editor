@@ -32,15 +32,16 @@ local function brushContains(k, l, brush)
     return false
 end
 
-function fillBrush(forceSize, brush, percentProgress)
+--- forceSizeZeroBased: 0 for size 1, nil for random size; ie. no forced size
+function fillBrush(forceSizeZeroBased, brush, percentProgress)
     brush = brush or curBrush
     local fillCount = 0
     for i,item in ipairs(brush) do
         --item = brush[1]
         --printf("brusht",item[1],item[2])
         if brickT[curX+item[1]][curY+item[2]][1]==0 then -- if the first square is empty, double check?
-            local tryWidth = forceSize or randomBrickSize()
-            local tryHeight = forceSize or randomBrickSize()
+            local tryWidth = forceSizeZeroBased or randomBrickSize()
+            local tryHeight = forceSizeZeroBased or randomBrickSize()
             local maxW = tryWidth -- zero based!
             local maxH = tryHeight
             --printf("tries",maxW,maxH)
