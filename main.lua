@@ -242,6 +242,9 @@ function love.update(dt)
         if menuViewModel then
             menuView = MenuView(menuViewModel)
         end
+    elseif menuViewModel.isFinished then
+        menuViewModel = nil
+        menuView = nil
     end
 
     if dt < targetFrameTime then

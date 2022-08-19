@@ -51,6 +51,9 @@ function MenuViewModel:keypressed(key)
         if self.menuSel>1 then
             self.menuSel = self.menuSel - 1
         end
+    elseif key == "escape" or key == "return" then
+        self.isFinished = true
+        return
     end
 
     -- apply changes
