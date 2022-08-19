@@ -104,6 +104,7 @@ function drawEditor()
     drawSidebar()
 end
 
+local sidebarVPadding = 10
 function drawSidebar()
     local sideBarX = getSidebarX()
     local y = sidebarGutter
@@ -113,5 +114,9 @@ function drawSidebar()
     elseif BrushType == SquareBrush then
         brushText = "Square"
     end
+
     gfx.print("Brush (.): " .. brushText, sideBarX, y)
+    y = y + sidebarVPadding
+
+    gfx.print("Blocktype (1-7, 8): " .. blockNames[selBrickType], sideBarX, y)
 end

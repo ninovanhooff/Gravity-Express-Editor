@@ -39,8 +39,15 @@ function EditorViewModel:update()
         love.timer.sleep(0.1)
     end
 
+    for i = 3, 7 do
+        if love.keyboard.isDown(i) then
+            self:setBrickType(i)
+            break
+        end
+    end
+
     if love.mouse.isDown(1) then
-        fillBrush(0)
+        self:applyBrush()
     elseif love.mouse.isDown(2) then
         emptyBrush()
     end
@@ -107,6 +114,42 @@ function EditorViewModel:wheelMoved(_,y)
                 curY = levelProps.sizeY-brushSize+1
             end
         end
+    end
+end
+
+function EditorViewModel:applyBrush()
+    if selBrickType < 7 then -- colors
+        fillBrush(0)
+    elseif selBrickType == 7 then -- concrete
+        local occupied = false
+        printf("test ocupied")
+        for k=0,brushSize-1 do
+            for l=0,brushSize-1 do
+                if brickT[curX+k][curY+l][1]~= 0 then
+                    occupied = true
+                    break
+                end
+            end
+        end
+        printf("ocu",occupied)
+        if not occupied then
+            local pattern = math.random(0,greyMaxT[brushSize])
+            for k=0,brushSize-1 do
+                for l=0,brushSize-1 do
+                    brickT[curX+k][curY+l] = {7,pattern,brushSize,k,l}
+                end
+            end
+        end
+        printf("done concrete")
+    end
+end
+
+function EditorViewModel:setBrickType(idx)
+    selBrickType = idx
+    if selBrickType==7 then -- concrete
+        curBrush = SquareBrush(4)
+    elseif selBrickType>7 then
+        curBrush = SquareBrush(1)
     end
 end
 
