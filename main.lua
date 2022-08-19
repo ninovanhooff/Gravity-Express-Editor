@@ -237,6 +237,8 @@ end
 
 function love.update(dt)
     local targetFrameTime = 1/30
+
+    love.mouse.setVisible(not menuView) -- menus don't support he mouse
     if not menuViewModel then
         menuViewModel = editorViewModel:update()
         if menuViewModel then
@@ -255,6 +257,8 @@ end
 function love.keypressed(key)
     if menuViewModel then
         menuViewModel:keypressed(key)
+    else
+        editorViewModel:keypressed(key)
     end
 end
 

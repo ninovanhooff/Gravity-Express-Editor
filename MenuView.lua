@@ -16,7 +16,9 @@ end
 
 local menuPadding = 15
 function MenuView:draw()
-    local menuX, menuY, menuW, menuH = 100, 100, 125, 45+#self.data*12-3
+    local menuW, menuH = 150, 45+#self.data*12-3
+    local menuX = (editorTilesX()/2)*tileSize - menuW/2
+    local menuY = (editorTilesY()/2)*tileSize - menuH/2
     local x = menuX + menuPadding
     local y = menuY + menuPadding
     local hMiddle = menuX + menuW/2

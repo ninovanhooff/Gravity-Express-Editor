@@ -22,42 +22,7 @@ end
 
 -- may return menu specs to display
 function EditorViewModel:update()
-    if love.keyboard.isDown(".") then
-        -- change brush
-        if selBrickType<7 then
-            if BrushType==CircleBrush then
-                curBrush = SquareBrush(brushSize)
-                editorStatusMsg = "brush changed to square"
-            else -- paint brush
-                curBrush = CircleBrush(brushSize)
-                editorStatusMsg = "brush changed to circle"
-            end
-        else
-            editorStatusMsg = "Can only change brush when bricks are selected"
-        end
-        love.timer.sleep(0.1)
-    end
-
-    -- block type
-    for i = 3, 8 do
-        if love.keyboard.isDown(i) then
-            if i == 8 then
-                if selBrickType < 7 then
-                    selBrickType = 8
-                else
-                    selBrickType = selBrickType + 1
-                end
-                if not blockNames[selBrickType] then
-                    selBrickType = 8
-                end
-            else
-                selBrickType = i
-            end
-            self:setBrickType(selBrickType)
-            sleep(0.1)
-            break
-        end
-    end
+    -- keyboard events handled in keypressed
 
     if love.mouse.isDown(1) then
         local menuVM = self:applyBrush()
@@ -137,6 +102,47 @@ function EditorViewModel:wheelMoved(_,y)
             end
         end
     end
+end
+
+function EditorViewModel:keypressed(key)
+    if key =="." then
+        -- change brush
+        if selBrickType<7 then
+            if BrushType==CircleBrush then
+                curBrush = SquareBrush(brushSize)
+                editorStatusMsg = "brush changed to square"
+            else -- paint brush
+                curBrush = CircleBrush(brushSize)
+                editorStatusMsg = "brush changed to circle"
+            end
+        else
+            editorStatusMsg = "Can only change brush when bricks are selected"
+        end
+    end
+
+    -- block type
+    for i = 3, 8 do
+        if key == tostring(i) then
+            if i == 8 then
+                if selBrickType < 7 then
+                    selBrickType = 8
+                else
+                    selBrickType = selBrickType + 1
+                end
+                if not blockNames[selBrickType] then
+                    selBrickType = 8
+                end
+            else
+                selBrickType = i
+            end
+            self:setBrickType(selBrickType)
+            break
+        end
+    end
+
+
+    checkY()
+    checkY()
 end
 
 -- may return a menu spec to display
