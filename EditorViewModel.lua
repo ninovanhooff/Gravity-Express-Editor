@@ -7,6 +7,7 @@
 require("object")
 
 
+local sleep = love.timer.sleep
 local mouse = love.mouse
 local floor = math.floor
 local min = math.min
@@ -39,9 +40,23 @@ function EditorViewModel:update()
         love.timer.sleep(0.1)
     end
 
-    for i = 3, 7 do
+    -- block type
+    for i = 3, 8 do
         if love.keyboard.isDown(i) then
-            self:setBrickType(i)
+            if i == 8 then
+                if selBrickType < 7 then
+                    selBrickType = 8
+                else
+                    selBrickType = selBrickType + 1
+                end
+                if not blockNames[selBrickType] then
+                    selBrickType = 8
+                end
+            else
+                selBrickType = i
+            end
+            self:setBrickType(selBrickType)
+            sleep(0.1)
             break
         end
     end
@@ -141,6 +156,23 @@ function EditorViewModel:applyBrush()
             end
         end
         printf("done concrete")
+    else
+        -- special
+        occupied = SpecialCollision(curX,curY)
+        local tempT = deepcopy(specialDefs[selBrickType])
+
+        if occupied==false then
+            --if curX+specialDefs[selBrickType].w-1<=levelProps.sizeX and curY+specialDefs[selBrickType].h-1<=levelProps.sizeY then
+            tempT.x,tempT.y = curX,curY
+            table.insert(specialT,tempT)
+            CheckSpecial(specialT[#specialT])
+            editorStatusMsg = "Press square to edit object properties"
+            --else
+            --editorStatusMsg="Not inside level bounds, enlarge level"
+            --end
+        else
+            editorStatusMsg = "Overlap with another object"
+        end
     end
 end
 
@@ -148,10 +180,22 @@ function EditorViewModel:setBrickType(idx)
     selBrickType = idx
     if selBrickType==7 then -- concrete
         curBrush = SquareBrush(4)
-    elseif selBrickType>7 then
+    elseif selBrickType > 7 then
         curBrush = SquareBrush(1)
     end
 end
+
+function CheckSpecial(item)
+    if item.x+item.w-1>levelProps.sizeX then
+        item.x = levelProps.sizeX-item.w+1
+        editorStatusMsg = "Adjusted x to fit inside level"
+    end
+    if item.y+item.h-1>levelProps.sizeY then
+        item.y = levelProps.sizeY-item.h+1
+        editorStatusMsg = "Adjusted y to fit inside level"
+    end
+end
+
 
 function checkX() --whether curX and camPos[1] are in bounds
     local editorSizeX = editorTilesX()
@@ -180,4 +224,13 @@ function checkY()
     if curY>levelProps.sizeY-brushSize then
         curY = levelProps.sizeY-brushSize+1
     end
+end
+
+function SpecialCollision(testX,testY)
+    for i,item in ipairs(specialT) do
+        if item.x<=testX and item.x+item.w>testX and item.y<=testY and item.y+item.h>testY then
+            return i
+        end
+    end
+    return false
 end
