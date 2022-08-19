@@ -60,7 +60,8 @@ function EditorViewModel:update()
     end
 
     if love.mouse.isDown(1) then
-        return self:applyBrush()
+        local menuVM = self:applyBrush()
+        if menuVM then return menuVM end
     elseif love.mouse.isDown(2) then
         if selBrickType < 8 then
             emptyBrush()
@@ -71,6 +72,7 @@ function EditorViewModel:update()
             end
         end
     end
+
     if love.mouse.isDown(3) then -- middle mouse button
         if not self.isPanning then
             self.panStart = {
@@ -88,10 +90,10 @@ function EditorViewModel:update()
         end
     else
         if self.isPanning then
-            self.isPanning = false
+        self.isPanning = false
         else
-            curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
-            curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
+    curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
+    curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
         end
     end
 
