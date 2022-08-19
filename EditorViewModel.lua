@@ -10,8 +10,6 @@ require("object")
 local mouse = love.mouse
 local floor = math.floor
 local min = math.min
-sideBarWidth = 100
-sideBarHeight = 600
 
 class("EditorViewModel").extends()
 
@@ -25,12 +23,27 @@ function EditorViewModel:init()
 end
 
 function EditorViewModel:update()
+    if love.keyboard.isDown(".") then
+        -- change brush
+        if selBrickType<7 then
+            if BrushType==CircleBrush then
+                curBrush = SquareBrush(brushSize)
+                editorStatusMsg = "brush changed to square"
+            else -- paint brush
+                curBrush = CircleBrush(brushSize)
+                editorStatusMsg = "brush changed to circle"
+            end
+        else
+            editorStatusMsg = "Can only change brush when bricks are selected"
+        end
+        love.timer.sleep(0.1)
+    end
+
     if love.mouse.isDown(1) then
         fillBrush(0)
     elseif love.mouse.isDown(2) then
         emptyBrush()
     end
-
     if love.mouse.isDown(3) then -- middle mouse button
         if not self.isPanning then
             self.panStart = {
@@ -95,17 +108,6 @@ function EditorViewModel:wheelMoved(_,y)
             end
         end
     end
-end
-
-function editorSizeX()
-    -- reserve width for side
-    local width = love.window.getMode() --- first return value is width
-    return floor((width - sideBarWidth)/tileSize)
-end
-
-function editorSizeY()
-    local _,height = love.window.getMode() --- first return value is width
-    return floor(height/tileSize)
 end
 
 function checkX() --whether curX and camPos[1] are in bounds

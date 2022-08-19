@@ -12,6 +12,25 @@ local floor = math.floor
 local min = math.min
 local gfx  = love.graphics
 
+sideBarWidth = 150
+sideBarHeight = 200
+local sidebarGutter = 10
+
+function editorSizeX()
+    -- reserve width for side
+    local width = love.window.getMode() --- first return value is width
+    return floor((width - sideBarWidth)/tileSize)
+end
+
+function editorSizeY()
+    local _,height = love.window.getMode() --- first return value is width
+    return floor(height/tileSize)
+end
+
+function getSidebarX()
+    return editorSizeX()*tileSize + sidebarGutter
+end
+
 --- render a row of bricks, brute force, fail safe
 function renderLineHoriz(i,j, drawOffsetY)
     local startI = i
@@ -82,4 +101,17 @@ function drawEditor()
     -- brush cursor
     drawBrush()
     gfx.setScissor()
+    drawSidebar()
+end
+
+function drawSidebar()
+    local sideBarX = getSidebarX()
+    local y = sidebarGutter
+    local brushText
+    if BrushType == CircleBrush then
+        brushText = "Circle"
+    elseif BrushType == SquareBrush then
+        brushText = "Square"
+    end
+    gfx.print("Brush (.): " .. brushText, sideBarX, y)
 end
