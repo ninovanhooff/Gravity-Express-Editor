@@ -64,7 +64,14 @@ function EditorViewModel:update()
     if love.mouse.isDown(1) then
         self:applyBrush()
     elseif love.mouse.isDown(2) then
-        emptyBrush()
+        if selBrickType < 8 then
+            emptyBrush()
+        else
+            local foundIdx = SpecialCollision(curX,curY)
+            if foundIdx then
+                table.remove(specialT,foundIdx)
+            end
+        end
     end
     if love.mouse.isDown(3) then -- middle mouse button
         if not self.isPanning then
