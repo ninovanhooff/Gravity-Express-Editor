@@ -25,4 +25,5 @@ function InitEditor(w,h)
     frameCounter = 1
     keys = {true,true,true,true} -- make the barrier colors always lit
     editorMode = true
+    editorStatusMsg = "Created new level"
 end

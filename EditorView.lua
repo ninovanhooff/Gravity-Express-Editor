@@ -12,29 +12,31 @@ local floor = math.floor
 local min = math.min
 local gfx  = love.graphics
 
-sideBarWidth = 150
-sideBarHeight = 200
+sideBarWidth = 0
+sideBarHeight = 0
+bottomBarWidth = 450
+bottomBarHeight = 15
 local sidebarGutter = 10
 
-function editorSizeX()
+function editorTilesX()
     -- reserve width for side
     local width = love.window.getMode() --- first return value is width
     return floor((width - sideBarWidth)/tileSize)
 end
 
-function editorSizeY()
+function editorTilesY()
     local _,height = love.window.getMode() --- first return value is width
-    return floor(height/tileSize)
+    return floor((height - bottomBarHeight)/tileSize)
 end
 
 function getSidebarX()
-    return editorSizeX()*tileSize + sidebarGutter
+    return editorTilesX()*tileSize + sidebarGutter
 end
 
 --- render a row of bricks, brute force, fail safe
 function renderLineHoriz(i,j, drawOffsetY)
     local startI = i
-    local endI = min(levelProps.sizeX, camPos[1] + editorSizeX()-1)
+    local endI = min(levelProps.sizeX, camPos[1] + editorTilesX()-1)
     while i<=endI do
         local curBrick = brickT[i]
         if not curBrick then
@@ -84,14 +86,14 @@ function renderLineHoriz(i,j, drawOffsetY)
 end
 
 function drawBricks()
-    local endY = min(levelProps.sizeY, camPos[2]+editorSizeY())
+    local endY = min(levelProps.sizeY, camPos[2]+editorTilesY())
     for y = camPos[2], endY do
         renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
     end
 end
 
 function drawEditor()
-    gfx.setScissor(0,0,editorSizeX()*tileSize, editorSizeY()*tileSize)
+    gfx.setScissor(0,0,editorTilesX()*tileSize, editorTilesY()*tileSize)
     fillCheckerBoard()
     drawSpecials(camPos)
     drawBricks()
@@ -101,22 +103,22 @@ function drawEditor()
     -- brush cursor
     drawBrush()
     gfx.setScissor()
-    drawSidebar()
+    drawBottomBar()
 end
 
-local sidebarVPadding = 10
-function drawSidebar()
-    local sideBarX = getSidebarX()
-    local y = sidebarGutter
-    local brushText
+function drawBottomBar()
+    local bottomTexts = {}
+    local brushText = "Brush (.): "
     if BrushType == CircleBrush then
-        brushText = "Circle"
+        brushText = brushText .. "Circle"
     elseif BrushType == SquareBrush then
-        brushText = "Square"
+        brushText = brushText .. "Square"
     end
+    table.insert(bottomTexts, brushText)
 
-    gfx.print("Brush (.): " .. brushText, sideBarX, y)
-    y = y + sidebarVPadding
+    table.insert(bottomTexts, "Blocktype (3-7, 8): " .. blockNames[selBrickType])
 
-    gfx.print("Blocktype (1-7, 8): " .. blockNames[selBrickType], sideBarX, y)
+    table.insert(bottomTexts, " | " .. editorStatusMsg)
+
+    gfx.print(table.concat(bottomTexts, " "), sidebarGutter, editorTilesY() * tileSize)
 end

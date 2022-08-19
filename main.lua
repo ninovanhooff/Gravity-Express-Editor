@@ -163,7 +163,14 @@ function love.load(args)
         print("Creating new level")
         InitEditor(60,60)
         local displayIdx = 1
-        love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize, {display=displayIdx, resizable = true, x=1, y=1, minwidth=sideBarWidth*2, minheight = sideBarHeight} )
+
+        love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize,
+            {
+                display=displayIdx, resizable = true, x=1, y=1,
+                minwidth=math.max(sideBarWidth*2, bottomBarWidth),
+                minheight = math.max(sideBarHeight, bottomBarHeight)
+            }
+        )
         love.window.setPosition(20,20, displayIdx)
     elseif args[2] == "lua" then
         print("Reading Gravity Express format")

@@ -154,7 +154,7 @@ function EditorViewModel:setBrickType(idx)
 end
 
 function checkX() --whether curX and camPos[1] are in bounds
-    local editorSizeX = editorSizeX()
+    local editorSizeX = editorTilesX()
 
     camPos[1] = lume.clamp(camPos[1], 1, levelProps.sizeX - editorSizeX)
 
@@ -169,7 +169,7 @@ function checkX() --whether curX and camPos[1] are in bounds
 end
 
 function checkY()
-    local editorSizeY = editorSizeY()
+    local editorSizeY = editorTilesY()
 
     camPos[2] = lume.clamp(camPos[2], 1, levelProps.sizeY - editorSizeY)
 
