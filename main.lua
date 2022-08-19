@@ -21,6 +21,7 @@ require("EditorView")
 require("EditorViewModel")
 require("MenuView")
 require("MenuViewModel")
+require("dataUtil")
 require("serialize")
 
 local floor = math.floor
@@ -31,11 +32,12 @@ gfxEnabled = true -- when false, no image displayed, but written to file. Useful
 editorMode = true
 condenseEnabled = false
 curX, curY = 1,1
+luaLevelDir = "lua-levels/"
 
 
 camPos = {1,1,0,0}
 
-local menuViewModel, menuView
+local editorViewModel, menuViewModel, menuView
 
 function inspect(tbl)
     for i,item in pairs(tbl) do
@@ -59,94 +61,6 @@ function love.draw()
     end
 end
 
---- replace all non-cencrete bricks by 1x1 tiles, including empty space
---- in other words, keep only the type([1]), and set sizing values to 1,1,0,0
-local function unOptimize()
-    print("--- unOptimizing")
-    for _, xTem in ipairs(brickT) do
-        for y, yTem in ipairs(xTem) do
-            if yTem[1] < 7 then
-                xTem[y] = {yTem[1], 1, 1, 0, 0}
-            end
-        end
-    end
-end
-
-local function optimizeEmptySpace()
-    print("--- optimizing empty space")
-    for i=1,levelProps.sizeX do
-        local lastBrickType = -1
-        local lastJ = -1
-        for j=levelProps.sizeY,1,-1 do -- traverse column BACKWARDS
-            if lastBrickType == -1 and brickT[i][j][1] < 3 then
-                lastBrickType = brickT[i][j][1]
-            end
-            if brickT[i][j][1] == lastBrickType and j>1 and (lastJ == -1 or lastJ - j < 255) then -- empty space with max height of 254
-                if lastJ==-1 then
-                    lastJ = j -- set END y of empty space
-                end
-            else -- always for j==1
-                if lastJ~=-1 then
-                    for k=j+1,lastJ do
-                        --brickT[i][k][4]=lastJ-j
-                        brickT[i][k][3]=lastJ-j -- h
-                        brickT[i][k][5]=k-(j+1) -- cur Y sub index. 0-based
-                    end
-                    lastJ=-1
-                    lastBrickType=-1
-                end
-            end
-
-        end
-    end
-    -- todo horizontal direction too? then maybe we need purely column / row based drawing. not the "fast" approach
-end
-
-local function condenseBricks()
-    print("--- condensing bricks")
-    --local brickTypeBU = selBrickType
-    --xBU,yBU,curX,curY = curX,curY,1,1
-    for color = 3,6 do
-        editorStatusMsg = "Compacting "..blockNames[color-2].."s..."
-        condenseBrush = {}
-        --add all 1x1 of color
-        for i = 1,levelProps.sizeX do
-            for j = 1,levelProps.sizeY do
-                local curBrick = brickT[i][j]
-                if curBrick[1]==color and curBrick[2]==1 and curBrick[3]==1 then
-                    table.insert(condenseBrush,{i-1,j-1})
-                end
-                curBrick = nil
-            end
-        end
-        emptyBrush(condenseBrush)
-        selBrickType = color
-        fillBrush(nil,condenseBrush,true) -- todo use no forcesize but random
-    end
-    --selBrickType = brickTypeBU
-    --curX,curY = xBU,yBU
-    --brickTypeBU = nil
-    editorStatusMsg = "Compacting done"
-    --RenderEditor()
-end
-
-local function readBinaryBrickT(fileName)
-    print("Reading brickT from bin file")
-    local packFormat = levelProps.packFormat
-    local packSize = love.data.getPackedSize(packFormat)
-    local brickFile = io.open("lua-levels/"..fileName..".bin", "rb")
-    local tile
-    brickT = {}
-    for x = 1, levelProps.sizeX do
-        brickT[x] = {}
-        for y = 1, levelProps.sizeY do
-            tile = { love.data.unpack(packFormat, brickFile:read(packSize)) }
-            table.remove(tile) -- remove the extra positional element returned by unpack
-            brickT[x][y] = tile
-        end
-    end
-end
-
 function love.load(args)
     love.keyboard.setKeyRepeat( true )
     sprite = love.graphics.newImage("sprite.png")
@@ -155,11 +69,17 @@ function love.load(args)
 
     local fileName = args[1]
     print("Filename", fileName)
+    assert(fileName, "filename not provided")
 
     -- READ INPUT FILE from args
-    if not fileName then
+    if args[2] == "convert" then
+        convertLevel(fileName)
+        love.event.quit()
+    elseif love.filesystem.getInfo(luaLevelDir .. fileName .. ".lua") then
+        readLuaLevel(fileName)
+    else
         print("Creating new level")
-        InitEditor(60,60)
+        generateLevel(60,60)
         local displayIdx = 1
 
         love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize,
@@ -170,68 +90,11 @@ function love.load(args)
             }
         )
         love.window.setPosition(20,20, displayIdx)
-    elseif args[2] == "lua" then
-        print("Reading Gravity Express format")
-        local levelT = require("lua-levels/" .. fileName)
-        specialT = levelT.specialT
-        levelProps = levelT.levelProps
-        brickT = levelT.brickT
-        if not brickT then
-            readBinaryBrickT(fileName)
-        else
-            print("brickT read from lua file")
-        end
-        unOptimize()
-    else
-        print("Converting cgl + intermediate lua result from cgl reader")
-        levelT = require("intermediates/" .. fileName .. "_intermediate")
-        specialT = levelT.specialT
-        levelProps = levelT.levelProps
-        brickT = {}
-
-        brickT = readCglBrickT(fileName)
-        unOptimize()
-
-        assert(levelProps.sizeX == #brickT, "Level width does not match beteen CGL and lua files!")
-        assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
-        repairSpecials()
     end
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
-
-    if (fileName) then
-
-        if condenseEnabled then
-            condenseBricks()
-        end
-        optimizeEmptySpace()
-
-        table.compress(brickT)
-        -- FILE WRITE
-        local luaFilePath = "lua-levels/" .. fileName .. ".lua"
-        print("--- writing ".. luaFilePath)
-        writeLua(luaFilePath, {
-            levelProps = levelProps,
-            specialT = specialT
-        })
-
-        writeBrickT("lua-levels/" .. fileName .. ".bin", brickT)
-
-        -- IMAGE OUT
-        if not gfxEnabled then
-            local canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
-            love.graphics.setCanvas(canvas)
-            --print("Frame-----")
-            drawSpecials(camPos)
-            drawBricks()
-            --print("---- numDraws", numDraws)
-            love.graphics.setCanvas()
-
-            love.filesystem.setIdentity( "GravityExpressEditor" )
-            canvas:newImageData():encode("png",fileName .. ".png")
-            love.event.quit()
-        end
-    end
+    InitEditor()
+    editorViewModel = EditorViewModel(fileName)
 
 end
 

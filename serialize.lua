@@ -62,10 +62,11 @@ function writeLua( filepath, table_to_export )
     file:close()
 end
 
-function writeBrickT(filepath, table_to_export)
+function writeCompressedBrickT(filepath)
+    local compressedBrickT, packFormat = table.compress(deepcopy(brickT))
     print("--- writing "..filepath)
     assert( filepath, "writeBrickT, filepath required")
-    assert( table_to_export, "writeBrickT, table_to_export required")
+    assert( compressedBrickT, "writeBrickT, table_to_export required")
 
     local file, file_error = io.open( filepath, "wb")
     if not file then
@@ -73,11 +74,12 @@ function writeBrickT(filepath, table_to_export)
         return
     end
 
-    for x, xtem in ipairs(brickT) do
+    for x, xtem in ipairs(compressedBrickT) do
         for y,ytem in ipairs(xtem.compressed) do
             file:write(ytem)
         end
     end
 
     file:close()
+    return packFormat
 end

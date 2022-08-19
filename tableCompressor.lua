@@ -7,8 +7,7 @@
 function table.compress(tbl)
     print("--- compressing table")
     local format = "BBBBB"
-    levelProps.packFormat = format
-    for x, xtem in ipairs(tbl) do
+    for _, xtem in ipairs(tbl) do
         for y,ytem in ipairs(xtem) do
             -- unpack refers to table.unpack; which returns table entries as extra arguments (vararg)
             xtem[y]=love.data.pack("string", format, unpack(ytem))
@@ -25,4 +24,5 @@ function table.compress(tbl)
         }
         tbl[x]= setmetatable(compressedColumn, unpackMeta)
     end
+    return tbl, format
 end

@@ -6,6 +6,32 @@
 
 local min = math.min
 
+local random = love.math.random
+local function noOp() end
+local renderProgress = noOp
+
+--- weighted bricksize, where larger bricks are more likely, returns 0-based size
+local function randomBrickSize()
+    local value = random()
+    if value < 0.2 then
+        return 0
+    elseif value < 0.6 then
+        return 1
+    else
+        return 2
+    end
+end
+
+local function selectionContains(k, l, selection)
+    --printf("contains?",k,l)
+    for _,item in pairs(selection) do
+        if item[1]==k and item[2]==l then
+            return true
+        end
+    end
+    return false
+end
+
 function isEmpty(selection)
     for _,item in ipairs(selection) do
         inspect(item)
@@ -30,6 +56,57 @@ function rectSelection(x,y,w,h)
         end
     end
     return selection
+end
+
+--- forceSizeZeroBased: 0 for size 1, nil for random size; ie. no forced size
+function fillSelection(forceSizeZeroBased, selection, percentProgress)
+    local fillCount = 0
+    for i,item in ipairs(selection) do
+        --item = brush[1]
+        --printf("brusht",item[1],item[2])
+        if brickT[item[1]][item[2]][1]==0 then -- if the first square is empty, double check?
+            local tryWidth = forceSizeZeroBased or randomBrickSize()
+            local tryHeight = forceSizeZeroBased or randomBrickSize()
+            local maxW = tryWidth -- zero based!
+            local maxH = tryHeight
+            --printf("tries",maxW,maxH)
+            for k=0,tryWidth do
+                for l=0,tryHeight do
+                    --[[if not BrushContains(item[1]+k,item[2]+l,brush) then
+                        printf("failed brush bounds",k,l)
+                        --constrK,constrL = BrushLimit(item[1]+k,item[2]+l)
+                        maxW = math.fmin(maxW,k-1)--+constrK)
+                        maxH = math.fmin(maxH,l-1)--+constrL)
+                        --printf("new minima",maxW,maxH)
+                        break]]
+                    if not selectionContains(item[1]+k,item[2]+l, selection) or brickT[item[1]+k][item[2]+l][1]~=0 then --item[1]+k+1<levelProps.sizeX and item[1]+k+1<levelProps.sizeY
+                        --printf("fail: occupied",item[1],k,item[2],l)
+                        if l==0 then
+                            maxW = math.min(maxW,k-1)
+                        else
+                            maxH = math.min(maxH,l-1)
+                        end
+                        break
+                    end
+                end
+            end
+            if maxW<0 then maxW=0 end
+            if maxH<0 then maxH=0 end
+            --printf(item[1],item[2],"maxWH",maxW,maxH)
+            for k=0,maxW do -- now fill it
+                for l=0,maxH do
+                    brickT[item[1]+k][item[2]+l] = {selBrickType,maxW+1,maxH+1,k,l} -- max is 1-based here!!
+                    --	printf(selBrickType,maxW,maxH,k,l)
+                    --if k==0 and l==0 then printf("fill",maxW,maxH) end
+                end
+            end
+            fillCount = fillCount+1
+            if math.fmod(fillCount,20)==19 then
+                renderProgress(editorStatusMsg,i/#selection)
+            end
+            --printf("endfill")
+        end
+    end
 end
 
 --- fill selection with {0,1,1,0,0} (1x1 empty tile)

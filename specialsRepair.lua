@@ -358,6 +358,7 @@ local specialRepairs = {
     [15] = repairBarrier
 }
 
+--- optmizes and fixes alignment issues for specials
 function repairSpecials()
     print("--- repairSpecials")
     for _, item in ipairs(specialT) do

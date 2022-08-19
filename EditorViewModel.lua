@@ -4,19 +4,15 @@
 --- DateTime: 18/08/2022 22:56
 ---
 
-local sleep = love.timer.sleep
 local mouse = love.mouse
 local floor = math.floor
 local min = math.min
+local isDown = love.keyboard.isDown
 
 class("EditorViewModel").extends()
 
--- global singleton
-if not editorViewModel then
-    editorViewModel = EditorViewModel()
-end
-
-function EditorViewModel:init()
+function EditorViewModel:init(fileName)
+    self.fileName = fileName
     EditorViewModel.super.init()
 end
 
@@ -93,7 +89,6 @@ function EditorViewModel:wheelMoved(_,y)
             brushSize = brushSize + 1
             if BrushType == CircleBrush then brushSize = brushSize+1 end
             curBrush = BrushType(brushSize)
-            print(curX,brushSize,levelProps.sizeX)
             if curX+brushSize>levelProps.sizeX then
                 curX = levelProps.sizeX-brushSize+1
             end
@@ -118,6 +113,8 @@ function EditorViewModel:keypressed(key)
         else
             editorStatusMsg = "Can only change brush when bricks are selected"
         end
+    elseif isDown("lgui", "rgui") and isDown("s") then
+        saveCompressedLevel(luaLevelDir .. self.fileName)
     end
 
     -- block type
@@ -182,11 +179,11 @@ function EditorViewModel:applyBrush()
                 local curList = deepcopy(specialVars[curO.sType])
                 table.insert(curList,1,{"x",1,levelProps.sizeX})
                 table.insert(curList,2,{"y",1,levelProps.sizeY})
-                for i,item in ipairs(curList) do
+                for _,item in ipairs(curList) do
                     item.val = curO[item[1]]
                 end
                 if curO.sType==8 then -- platform, load pType specific vals
-                    for i,item in ipairs(pltfrmDefs[curO.pType]) do
+                    for _,item in ipairs(pltfrmDefs[curO.pType]) do
                         table.insert(curList,item)
                         curList[#curList].val = curO[item[1]]
                     end
