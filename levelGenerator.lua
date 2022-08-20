@@ -64,20 +64,40 @@ function decreaseLevelSizeX()
 end
 
 function increaseLevelSizeX()
+    -- insert left of curX, except when rightmost row is selected
+    if curX == levelProps.sizeX then
+        curX = levelProps.sizeX + 1
+    end
     local newSizeX = levelProps.sizeX + 1
     local tempT = {}
-    for i=1,levelProps.sizeY do
+    for _=1,levelProps.sizeY do
         table.insert(tempT,{0,1,1,0,0} )
     end
-    for i=1,newSizeX - levelProps.sizeX do
-        table.insert(brickT,deepcopy(tempT))
+    for _=1,newSizeX - levelProps.sizeX do
+        table.insert(brickT,curX, deepcopy(tempT))
+    end
+
+    for _, item in ipairs(specialT) do
+        if item.x >= curX then
+            item.x = item.x + 1
+        end
     end
     levelProps.sizeX = levelProps.sizeX + 1
 end
 
 function increaseLevelSizeY()
+    -- insert above selected row, except when bottom row is selected
+    if curY == levelProps.sizeY then
+        curY = curY + 1
+    end
     for _,item in ipairs(brickT) do
-        table.insert(item,{0,1,1,0,0}) --add empty tile at end
+        table.insert(item, curY, {0,1,1,0,0}) --add empty tile at end
+    end
+
+    for _, item in ipairs(specialT) do
+        if item.y >= curY then
+            item.y = item.y + 1
+        end
     end
     levelProps.sizeY = levelProps.sizeY + 1
 end
