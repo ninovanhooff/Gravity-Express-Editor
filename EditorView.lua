@@ -92,18 +92,29 @@ function drawBricks()
     end
 end
 
-function drawEditor()
+function drawEditor(viewModel)
     gfx.setScissor(0,0,editorTilesX()*tileSize, editorTilesY()*tileSize)
     fillCheckerBoard()
     drawSpecials(camPos)
     drawBricks()
-    --if not love.keyboard.isDown('up', 'down', 'left', 'right') then
-    --    love.timer.sleep(0.1)
-    --end
+    drawDirectionsIndicator(viewModel)
     -- brush cursor
     drawBrush()
     gfx.setScissor()
     drawBottomBar()
+end
+
+function drawDirectionsIndicator(viewModel)
+    if viewModel.dragStart and not viewModel.dragStart.directions then
+        local thresholdPixels = EditorViewModel.dragDirectionThreshold * tileSize
+        local centerX, centerY = curXScreen()+(brushSize*tileSize/2), curYScreen() + (brushSize*tileSize/2)
+        local leftX, topY = centerX - thresholdPixels, centerY - thresholdPixels
+        local rightX, bottomY = centerX + thresholdPixels, centerY + thresholdPixels
+        gfx.line(leftX, topY, rightX, bottomY)
+        gfx.line(rightX, topY, leftX, bottomY)
+        gfx.line(centerX, topY, centerX, bottomY) -- vertical
+        gfx.line(leftX, centerY, rightX, centerY) -- horizontal
+    end
 end
 
 function drawBottomBar()

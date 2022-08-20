@@ -8,8 +8,12 @@ local mouse = love.mouse
 local floor = math.floor
 local min = math.min
 local isDown = love.keyboard.isDown
+local sign = lume.sign
+local abs = math.abs
 
 class("EditorViewModel").extends()
+
+EditorViewModel.dragDirectionThreshold = 5
 
 function EditorViewModel:init(fileName)
     self.fileName = fileName
@@ -51,15 +55,76 @@ function EditorViewModel:update()
         end
     else
         if self.isPanning then
-        self.isPanning = false
+            self.isPanning = false
         else
-    curX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
-    curY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
+            self:updateCursorPosition()
         end
     end
 
     checkX()
     checkY()
+end
+
+--- update cursorPsition; optionally constraining to 8 cardinal directions
+function EditorViewModel:updateCursorPosition()
+    -- update cursor position
+    local newX = (floor(love.mouse.getX() / tileSize - brushSize/2)) + camPos[1]
+    local newY = (floor(love.mouse.getY() / tileSize - brushSize/2)) + camPos[2]
+
+    if isDown("lshift", "rshift") then -- constrain to right angles
+        if not self.dragStart then
+            self.dragStart = {x = curX, y = curY, signX = 1, signY = 1}
+        elseif not self.dragStart.directions then
+            local dragDirectionThreshold = EditorViewModel.dragDirectionThreshold
+            local dx, dy = newX - self.dragStart.x, newY - self.dragStart.y
+            local xEligible = math.abs(dx) > dragDirectionThreshold
+            local yEligible = math.abs(dy) > dragDirectionThreshold
+            if xEligible then
+                self.dragStart.majorAxis = "x"
+                if math.abs(dy) >= dragDirectionThreshold /2 then
+                    self.dragStart.directions = "xy"
+                    if sign(dx) ~= sign(dy) then
+                        self.dragStart.signY = -1
+                    end
+                else
+                    self.dragStart.directions = "x"
+                    self.dragStart.signX = 1
+                end
+            elseif yEligible then
+                self.dragStart.majorAxis = "y"
+                if math.abs(dx) >= dragDirectionThreshold /2 then
+                    self.dragStart.directions = "xy"
+                    if sign(dx) ~= sign(dy) then
+                        self.dragStart.signX = -1
+                    end
+                else
+                    self.dragStart.directions = "y"
+                end
+            end
+        else
+            local dx, dy = newX - self.dragStart.x, newY - self.dragStart.y
+            local magnitude
+
+            if self.dragStart.majorAxis == "x" then
+                magnitude = dx
+            else
+                magnitude = dy
+            end
+
+            if self.dragStart.directions == "xy" then
+                curX = self.dragStart.x + magnitude*self.dragStart.signX
+                curY = self.dragStart.y + magnitude*self.dragStart.signY
+            elseif self.dragStart.directions == "y" then
+                curY = self.dragStart.y + magnitude*self.dragStart.signY
+            else
+                curX = self.dragStart.x + magnitude*self.dragStart.signX
+            end
+        end
+    else
+        self.dragStart = nil
+        curX = newX
+        curY = newY
+    end
 end
 
 function EditorViewModel:wheelMoved(_,y)

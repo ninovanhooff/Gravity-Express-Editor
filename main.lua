@@ -54,7 +54,7 @@ function table.sum(tbl)
 end
 
 function love.draw()
-    drawEditor()
+    drawEditor(editorViewModel)
 
     if menuView then
         menuView:draw()
@@ -80,17 +80,17 @@ function love.load(args)
     else
         print("Creating new level")
         generateLevel(60,60)
-        local displayIdx = 1
-
-        love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize,
-            {
-                display=displayIdx, resizable = true, x=1, y=1,
-                minwidth=math.max(sideBarWidth*2, bottomBarWidth),
-                minheight = math.max(sideBarHeight, bottomBarHeight)
-            }
-        )
-        love.window.setPosition(20,20, displayIdx)
     end
+
+    local displayIdx = 1
+    love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize,
+        {
+            display=displayIdx, resizable = true, x=1, y=1,
+            minwidth=math.max(sideBarWidth*2, bottomBarWidth),
+            minheight = math.max(sideBarHeight, bottomBarHeight)
+        }
+    )
+    love.window.setPosition(20,20, displayIdx)
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
     InitEditor()
