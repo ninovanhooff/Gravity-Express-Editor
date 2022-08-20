@@ -15,7 +15,7 @@ local gfx  = love.graphics
 sideBarWidth = 0
 sideBarHeight = 0
 bottomBarWidth = 450
-bottomBarHeight = 15
+bottomBarHeight = 32
 local sidebarGutter = 10
 
 function editorTilesX()
@@ -118,8 +118,8 @@ function drawDirectionsIndicator(viewModel)
 end
 
 function drawBottomBar()
-    local bottomTexts = {}
-    local brushText = "Brush (.): "
+    local bottomTexts = {"x: " .. curX .. ", y:" .. curY}
+    local brushText = "(.) Brush: "
     if BrushType == CircleBrush then
         brushText = brushText .. "Circle"
     elseif BrushType == SquareBrush then
@@ -127,9 +127,7 @@ function drawBottomBar()
     end
     table.insert(bottomTexts, brushText)
 
-    table.insert(bottomTexts, "Blocktype (3-7, 8): " .. blockNames[selBrickType])
-
-    table.insert(bottomTexts, " | " .. editorStatusMsg)
-
-    gfx.print(table.concat(bottomTexts, " "), sidebarGutter, editorTilesY() * tileSize)
+    table.insert(bottomTexts, "(3-7, 8) Blocktype: " .. blockNames[selBrickType])
+    gfx.print(table.concat(bottomTexts, " | "), sidebarGutter, editorTilesY() * tileSize)
+    gfx.print(editorStatusMsg, sidebarGutter, editorTilesY() * tileSize + 14)
 end

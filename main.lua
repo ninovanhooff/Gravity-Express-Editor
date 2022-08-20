@@ -91,6 +91,7 @@ function love.load(args)
         }
     )
     love.window.setPosition(20,20, displayIdx)
+    love.window.setTitle( "Gravity Express Editor | " .. fileName )
 
     gameWidthTiles, gameHeightTiles = levelProps.sizeX, levelProps.sizeY
     InitEditor()
