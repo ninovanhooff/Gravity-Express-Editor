@@ -25,6 +25,12 @@ function drawSprite(x,y,_,srcX,srcY,w,h)
     gfx.draw(sprite, quad, x, y)
 end
 
+function loadSprite(name)
+    sprite = love.graphics.newImage("images/" .. name)
+    quadCache = {}
+    spriteName = name
+end
+
 function curXScreen()
     return (curX - camPos[1]) * tileSize
 end

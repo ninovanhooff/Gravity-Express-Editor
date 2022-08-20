@@ -178,6 +178,13 @@ function EditorViewModel:keypressed(key)
         else
             editorStatusMsg = "Can only change brush when bricks are selected"
         end
+    elseif isDown("l") then
+        -- switch sprite
+        if spriteName == "sprite_playdate.png" then
+            loadSprite("sprite_color.png")
+        else
+            loadSprite("sprite_playdate.png")
+        end
     elseif isDown("lgui", "rgui") and isDown("s") then
         saveCompressedLevel(luaLevelDir .. self.fileName)
     elseif isDown("d") and isDown ("x") then

@@ -63,7 +63,7 @@ end
 
 function love.load(args)
     love.keyboard.setKeyRepeat( true )
-    sprite = love.graphics.newImage("sprite.png")
+    loadSprite("sprite_color.png")
     print("sprite", sprite)
     frameCounter = 0
 
