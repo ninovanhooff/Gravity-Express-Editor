@@ -73,7 +73,7 @@ function EditorViewModel:updateCursorPosition()
 
     if isDown("lshift", "rshift") then -- constrain to right angles
         if not self.dragStart then
-            self.dragStart = {x = curX, y = curY, signX = 1, signY = 1}
+            self.dragStart = {x = newX, y = newY, signX = 1, signY = 1}
         elseif not self.dragStart.directions then
             local dragDirectionThreshold = EditorViewModel.dragDirectionThreshold
             local dx, dy = newX - self.dragStart.x, newY - self.dragStart.y
