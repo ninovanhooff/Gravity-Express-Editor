@@ -24,7 +24,7 @@ require("MenuViewModel")
 require("dataUtil")
 require("serialize")
 
-local floor = math.floor
+Debug = true
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8

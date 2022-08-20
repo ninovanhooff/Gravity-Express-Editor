@@ -29,7 +29,6 @@ function SquareBrush(w)
     for i = 0,w-1 do
         for j = 0,w-1 do
             table.insert(brushT,{i,j})
-            printf("SquareBrush",i,j)
         end
     end
     BrushType = SquareBrush
@@ -50,10 +49,8 @@ function CircleBrush(w) -- width
         table.insert(brushVerts,{white,(r+lr+1)*8,(r-j+1)*8,0}) -- right
         table.insert(brushVerts,1,{white,(r-lr)*8,(r-j)*8,0}) -- left
         table.insert(brushVerts,1,{white,(r-lr)*8,(r-j+1)*8,0}) -- left
-        printf("lr",lr)
         for i=r-lr,r+lr do
             table.insert(brushT,{i,r-j})
-            printf("circbrushW",i,r-j)
         end
     end
     table.insert(brushVerts,brushVerts[1]) -- cap bottom

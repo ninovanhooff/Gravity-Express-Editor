@@ -117,6 +117,8 @@ function clearSelection(selection, markOccupied)
         brickType = 2
     end
     for _, item in ipairs(selection) do
+        print("selection entry")
+        inspect(item)
         local curBrick = brickT[item[1]][item[2]]
         if curBrick[1]==7 then
             kmax = curBrick[3]-1-curBrick[4]

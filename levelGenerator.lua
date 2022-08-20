@@ -31,3 +31,84 @@ function generateLevel(w, h)
     end
     editorStatusMsg = "Created new level"
 end
+
+function decreaseLevelSizeX()
+    local newSizeX = levelProps.sizeX - 1
+    tempBrush = {}
+    curX,curY = newSizeX+1,1
+    for i=1,levelProps.sizeX-newSizeX do
+        for j=1,levelProps.sizeY do
+            table.insert(tempBrush,{i-1,j-1})
+            printf(i-1,j-1)
+        end
+    end
+    emptyBrush(tempBrush)
+    tempBrush = nil
+    for i = 1,levelProps.sizeX-newSizeX do
+        table.remove(brickT) --remove last col
+        for j=1,levelProps.sizeY do
+            local foundIdx = SpecialCollision(levelProps.sizeX-i+1,j)
+            if foundIdx then
+                table.remove(specialT,foundIdx)
+            end
+        end
+    end
+    if curX>=levelProps.sizeX-brushSize then
+        curX = levelProps.sizeX-brushSize+1
+    end
+    if camPos[1]+59>levelProps.sizeX then
+        camPos[1] = levelProps.sizeX-59
+    end
+    printf("newXs",curX,camPos[1])
+    levelProps.sizeX = levelProps.sizeX - 1
+end
+
+function increaseLevelSizeX()
+    local newSizeX = levelProps.sizeX + 1
+    local tempT = {}
+    for i=1,levelProps.sizeY do
+        table.insert(tempT,{0,1,1,0,0} )
+    end
+    for i=1,newSizeX - levelProps.sizeX do
+        table.insert(brickT,deepcopy(tempT))
+    end
+    levelProps.sizeX = levelProps.sizeX + 1
+end
+
+function increaseLevelSizeY()
+    for _,item in ipairs(brickT) do
+        table.insert(item,{0,1,1,0,0}) --add empty tile at end
+    end
+    levelProps.sizeY = levelProps.sizeY + 1
+end
+
+function decreaseLevelSizeY()
+    local curSizeY = levelProps.sizeY
+    local newSizeY = curSizeY -1
+    tempBrush = {}
+    curX,curY = 1, newSizeY +1
+    for i=1,levelProps.sizeX do
+        for j=1,curSizeY- newSizeY do
+            table.insert(tempBrush,{i-1,j-1})
+        end
+    end
+    emptyBrush(tempBrush)
+    tempBrush = nil
+    for i,item in ipairs(brickT) do
+        for j = 1,curSizeY- newSizeY do
+            local foundIdx = SpecialCollision(i,curSizeY-j+1)
+            if foundIdx then
+                table.remove(specialT,foundIdx)
+            end
+            table.remove(item) --remove last y of col
+        end
+    end
+    if curY>=levelProps.sizeY-brushSize then
+        curY = levelProps.sizeY-brushSize+1
+    end
+    if camPos[2]+31>levelProps.sizeY then
+        camPos[2] = levelProps.sizeY-31
+    end
+    levelProps.sizeY = levelProps.sizeY - 1
+    printf("newYs",curY,camPos[2])
+end

@@ -20,7 +20,7 @@ function EditorViewModel:init(fileName)
     EditorViewModel.super.init()
 end
 
--- may return menu specs to display
+-- may return MenuViewModel
 function EditorViewModel:update()
     -- keyboard events handled in keypressed
 
@@ -180,6 +180,18 @@ function EditorViewModel:keypressed(key)
         end
     elseif isDown("lgui", "rgui") and isDown("s") then
         saveCompressedLevel(luaLevelDir .. self.fileName)
+    elseif isDown("d") and isDown ("x") then
+        decreaseLevelSizeX()
+        editorStatusMsg = "Dereased X size to " .. levelProps.sizeX
+    elseif isDown("i") and isDown("x") then
+        increaseLevelSizeX()
+        editorStatusMsg = "Increased X size to " .. levelProps.sizeX
+    elseif isDown("d") and isDown ("y") then
+        decreaseLevelSizeY()
+        editorStatusMsg = "Dereased Y size to " .. levelProps.sizeY
+    elseif isDown("i") and isDown("y") then
+        increaseLevelSizeY()
+        editorStatusMsg = "Increased Y size to " .. levelProps.sizeY
     end
 
     -- block type
@@ -201,7 +213,6 @@ function EditorViewModel:keypressed(key)
             break
         end
     end
-
 
     checkY()
     checkY()
