@@ -87,7 +87,7 @@ function love.load(args)
         {
             display=displayIdx, resizable = true, x=1, y=1,
             minwidth=math.max(sideBarWidth*2, bottomBarWidth),
-            minheight = math.max(sideBarHeight, bottomBarHeight)
+            minheight = math.max(sideBarHeight, 224 + bottomBarHeight) -- playdate visible game view height
         }
     )
     love.window.setPosition(20,20, displayIdx)

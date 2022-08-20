@@ -14,7 +14,7 @@ local gfx  = love.graphics
 
 sideBarWidth = 0
 sideBarHeight = 0
-bottomBarWidth = 450
+bottomBarWidth = 400
 bottomBarHeight = 32
 local sidebarGutter = 10
 
