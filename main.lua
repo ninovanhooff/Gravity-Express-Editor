@@ -83,7 +83,7 @@ function love.load(args)
     end
 
     local displayIdx = 1
-    love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize,
+    love.window.setMode(levelProps.sizeX*tileSize+sideBarWidth,levelProps.sizeY*tileSize+bottomBarHeight,
         {
             display=displayIdx, resizable = true, x=1, y=1,
             minwidth=math.max(sideBarWidth*2, bottomBarWidth),
