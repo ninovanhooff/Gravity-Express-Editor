@@ -327,7 +327,7 @@ specialRenders = {
 function drawSpecials(camPos)
     for _,item in ipairs(specialT) do -- special blocks
         scrX,scrY = (item.x-camPos[1])*8-camPos[3],(item.y-camPos[2])*8-camPos[4]
-        if item.x+item.w>=camPos[1] and item.x<=camPos[1]+gameWidthTiles+1 and item.y+item.h>=camPos[2] and item.y<camPos[2]+gameHeightTiles+1 then
+        if item.x+item.w>=camPos[1] and item.x<=camPos[1]+levelProps.sizeX+1 and item.y+item.h>=camPos[2] and item.y<camPos[2]+levelProps.sizeY+1 then
             specialRenders[item.sType-7](item)
             pgeDrawRectoutline(scrX,scrY,item.w*8,item.h*8,purple) -- bounding box
         end
