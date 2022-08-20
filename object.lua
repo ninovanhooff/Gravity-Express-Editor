@@ -140,7 +140,6 @@ end
 local insert = table.insert
 local sort   = table.sort
 local concat = table.concat
-local unpack = table.unpack
 local function repeatString(s,t)
 	local chars = {}
 	for i=1,t do
