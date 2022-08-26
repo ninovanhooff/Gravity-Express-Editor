@@ -69,7 +69,10 @@ function love.load(args)
 
     local fileName = args[1]
     print("Filename", fileName)
-    assert(fileName, "filename not provided")
+    if not fileName then
+        print("WARNING - fileName argument not provided, using MyLevel")
+        fileName = "MyLevel"
+    end
 
     -- READ INPUT FILE from args
     if args[2] == "convert" then
