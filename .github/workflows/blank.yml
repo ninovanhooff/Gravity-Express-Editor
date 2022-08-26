@@ -49,7 +49,7 @@ jobs:
           # App copyright info
           copyright: Nino van Hooff
           # Icon path Should be .icns format Would be used in platform/xcode/Images.xcassets/OS X AppIcon.appiconset
-          # icon-path: ./icon.icns
+          icon-path: ./osx_icon.icns
           # LÖVE git ref Could be commit hash, tags or branch name
           # love-ref: # optional, default is c35356c841976eb6f370347b81eec845d5520338
           # Git patch file path for the LÖVE repo The patch must start from `love-ref` You can use `git diff` to get the patch file
@@ -64,4 +64,3 @@ jobs:
           # App version string Use 3 numbers seperated by dots Looks like 3.2.1
           version-string: 1.0.0
           # Nino: Extra installer and developer options omitted
-
