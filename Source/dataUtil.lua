@@ -72,16 +72,19 @@ local function condenseBricks()
 end
 
 function readBinaryBrickT(fileName)
-    print("Reading brickT from bin file")
     local packFormat = levelProps.packFormat
+    print("Reading brickT from bin file, format:", packFormat)
     local packSize = love.data.getPackedSize(packFormat)
-    local brickFile = io.open(luaLevelDir..fileName..".bin", "rb")
+    local brickFile, file_error = love.filesystem.newFile( luaLevelDir..fileName..".bin", "r")
+    assert(brickFile, file_error)
+    assert(brickFile:isOpen(), "brickFile not open")
     local tile
     brickT = {}
     for x = 1, levelProps.sizeX do
         brickT[x] = {}
         for y = 1, levelProps.sizeY do
-            tile = { love.data.unpack(packFormat, brickFile:read(packSize)) }
+            local data = brickFile:read(packSize)
+            tile = { love.data.unpack(packFormat, data) }
             table.remove(tile) -- remove the extra positional element returned by unpack
             brickT[x][y] = tile
         end
@@ -144,7 +147,7 @@ function convertLevel(fileName)
     assert(levelProps.sizeY == #brickT[1], "Level height does not match beteen CGL and lua files!")
     repairSpecials()
 
-    saveCompressedLevel("lua-levels/" .. fileName)
+    saveCompressedLevel(luaLevelDir .. fileName)
 
     -- IMAGE OUT
 
@@ -156,6 +159,5 @@ function convertLevel(fileName)
     --print("---- numDraws", numDraws)
     love.graphics.setCanvas()
 
-    love.filesystem.setIdentity( "GravityExpressEditor" )
     canvas:newImageData():encode("png",fileName .. ".png")
 end

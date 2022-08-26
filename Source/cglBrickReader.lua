@@ -124,11 +124,9 @@ end
 
 
 function readCglBrickT(fileName)
-    local fp = io.open("test-levels/" .. fileName .. ".CGL", "rb")
+    local fp, file_error = love.filesystem.newFile( "test-levels/" .. fileName .. ".CGL", "w")
 
-    if not fp then
-        error("file not found:" .. fileName)
-    end
+    assert(fp,"file not found:" .. fileName)
 
     -- file header
     assertHeader(fp, "CGL1")

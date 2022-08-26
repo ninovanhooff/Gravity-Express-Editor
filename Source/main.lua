@@ -62,6 +62,9 @@ function love.draw()
 end
 
 function love.load(args)
+    love.filesystem.setIdentity( "GravityExpressEditor" )
+    success = love.filesystem.createDirectory( luaLevelDir )
+    assert(success, "Could not create lua levels dir")
     love.keyboard.setKeyRepeat( true )
     loadSprite("sprite_color.png")
     print("sprite", sprite)

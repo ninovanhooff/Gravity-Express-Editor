@@ -8,7 +8,7 @@ function writeLua( filepath, table_to_export )
     assert( filepath, "writeLua, filepath required")
     assert( table_to_export, "writeLua, table_to_export required")
 
-    local file, file_error = io.open( filepath, "w")
+    local file, file_error = love.filesystem.newFile( filepath, "w")
     if not file then
         print("writeLua, Cannot open file ", filepath," (", file_error, ")")
         return
@@ -68,9 +68,9 @@ function writeCompressedBrickT(filepath)
     assert( filepath, "writeBrickT, filepath required")
     assert( compressedBrickT, "writeBrickT, table_to_export required")
 
-    local file, file_error = io.open( filepath, "wb")
+    local file, file_error = love.filesystem.newFile( filepath, "w")
     if not file then
-        print("writeLua, Cannot open file ", filepath," (", file_error, ")")
+        print("writeCompressedBrickT, Cannot open file ", filepath," (", file_error, ")")
         return
     end
 
