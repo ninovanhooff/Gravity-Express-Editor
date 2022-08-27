@@ -18,49 +18,15 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: macos-11
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-      - name: Love actions bare package
-        # You may pin to the exact commit or the version.
-        uses: 26F-Studio/love-actions-core@v1.0.0
+      - uses: nhartland/love-build@master
         with:
-          # List of folder & file paths to be built Don't need global quotes, separated by spaces Looks like: ./assets/ ./logics/ ./main.lua ./config.lua
-          build-list: ./Source
-          # Path to the .love package file Looks like ./dist/release/my_game.love
-          # package-path: # optional, default is ./game.love
-      - name: Love actions for macOS portable
-        # You may pin to the exact commit or the version.
-        uses: 26F-Studio/love-actions-macos-portable@v1.0.0
-        with:
-          # App display name
-          app-name: Gravity Express Editor
-          # App bundle id
-          bundle-id: com.ninovanhooff.gravityexpress.editor
-          # App copyright info
-          copyright: Nino van Hooff
-          # Icon path Should be .icns format Would be used in platform/xcode/Images.xcassets/OS X AppIcon.appiconset
-          icon-path: ./osx_icon.icns
-          # LÖVE git ref Could be commit hash, tags or branch name
-          # love-ref: # optional, default is c35356c841976eb6f370347b81eec845d5520338
-          # Git patch file path for the LÖVE repo The patch must start from `love-ref` You can use `git diff` to get the patch file
-          # love-patch: # optional
-          # Love package. Nino The previous step also uses the default, so leave it at default.
-          # love-package: # optional, default is ./game.love
-          # Path to the libs folder
-          # libs-path: # optional List of file paths to be added to `Copy Bundle Resources` build phase Don't need global quotes, separated by spaces Looks like: ./assets/ ./logics/ ./main.lua ./config.lua
-          # extra-assets: # optional
-          # Base name of the package Would be used to rename products
-          product-name: Gravity Express Editor
-          # App version string Use 3 numbers seperated by dots Looks like 3.2.1
-          version-string: 1.0.0
-          # Nino: Extra installer and developer options omitted
+          app_name: 'Gravity Express Editor'
+          love_version: '11.4'
+          # Use when the `main.lua` is in a subdirectory of your repository (here in `src/love`).
+          source_dir: 'Source'
