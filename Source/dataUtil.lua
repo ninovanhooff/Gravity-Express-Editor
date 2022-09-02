@@ -39,10 +39,16 @@ end
 --- in other words, keep only the type([1]), and set sizing values to 1,1,0,0
 local function unOptimize()
     print("--- unOptimizing")
+    local newBrickType
     for _, xTem in ipairs(brickT) do
         for y, yTem in ipairs(xTem) do
             if yTem[1] < 7 then
-                xTem[y] = {yTem[1], 1, 1, 0, 0}
+                if yTem[1] == 2 then -- replace collision occupied(2) by empty space(1)
+                    newBrickType = 1
+                else
+                    newBrickType = yTem[1]
+                end
+                xTem[y] = {newBrickType, 1, 1, 0, 0}
             end
         end
     end
