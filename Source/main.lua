@@ -32,7 +32,7 @@ gfxEnabled = true -- when false, no image displayed, but written to file. Useful
 editorMode = true
 condenseEnabled = false
 curX, curY = 1,1
-luaLevelDir = "lua-levels/"
+luaLevelDir = "levels/"
 
 
 camPos = {1,1,0,0}

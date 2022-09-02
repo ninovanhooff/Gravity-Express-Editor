@@ -6,10 +6,8 @@
 
 local mouse = love.mouse
 local floor = math.floor
-local min = math.min
 local isDown = love.keyboard.isDown
 local sign = lume.sign
-local abs = math.abs
 
 class("EditorViewModel").extends()
 
@@ -187,6 +185,33 @@ function EditorViewModel:keypressed(key)
         end
     elseif isDown("lgui", "rgui") and isDown("s") then
         saveCompressedLevel(luaLevelDir .. self.fileName)
+    elseif isDown("lgui", "rgui") and isDown("p") then
+        local testFileName = "temp"
+        local absoluteLevelDir = love.filesystem.getRealDirectory(luaLevelDir) .. "/" .. luaLevelDir
+        saveCompressedLevel(luaLevelDir .. testFileName)
+        local gameSourceFolder = "~/PlaydateProjects/CrazyGravityPlaydate/Source"
+        local copyCommandLua = string.format('cp -f "%s%s.lua" %s/levels',
+            absoluteLevelDir ,
+            testFileName,
+            gameSourceFolder
+        )
+        print(copyCommandLua)
+        os.execute(copyCommandLua)
+        local copyCommandBin = string.format('cp -f "%s%s.bin" %s/levels',
+            absoluteLevelDir ,
+            testFileName,
+            gameSourceFolder
+        )
+        print(copyCommandBin)
+        os.execute(copyCommandBin)
+        local pdcPath = "/usr/local/bin/pdc"
+        print("pdc path: " .. pdcPath)
+        local pdxName = "tester.pdx"
+        local compileAndPlayCommand = string.format("%s %s %s && open %s",
+            pdcPath, gameSourceFolder, pdxName, pdxName
+        )
+        print(compileAndPlayCommand)
+        os.execute(compileAndPlayCommand)
     elseif isDown("d") and isDown ("x") then
         decreaseLevelSizeX()
         editorStatusMsg = "Dereased X size to " .. levelProps.sizeX
