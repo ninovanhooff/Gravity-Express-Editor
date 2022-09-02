@@ -55,6 +55,7 @@ local function unOptimize()
 end
 
 local function condenseBricks()
+    local prevSelBrickType = selBrickType
     print("--- condensing bricks")
     --local brickTypeBU = selBrickType
     --xBU,yBU,curX,curY = curX,curY,1,1
@@ -75,6 +76,7 @@ local function condenseBricks()
         selBrickType = color
         fillSelection(nil, condenseSelection,true)
     end
+    selBrickType = prevSelBrickType
 end
 
 function readBinaryBrickT(fileName)
