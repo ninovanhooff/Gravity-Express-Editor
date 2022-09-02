@@ -121,7 +121,7 @@ end
 
 function readLuaLevel(fileName)
     print("Reading Gravity Express format")
-    local levelT = require("lua-levels/" .. fileName)
+    local levelT = require(luaLevelDir .. fileName)
     specialT = levelT.specialT
     levelProps = levelT.levelProps
     brickT = levelT.brickT
