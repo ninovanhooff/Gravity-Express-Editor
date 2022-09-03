@@ -16,7 +16,6 @@ function MenuViewModel:init(header, list, changeFunc, specialIndex)
     self.header = header
     self.list = list
     self.onChange = changeFunc
-    print(self.onChange)
     self.specialIndex = specialIndex
 
     self.menuSel = 1
