@@ -44,7 +44,7 @@ local function unOptimize()
         for y, yTem in ipairs(xTem) do
             if yTem[1] < 7 then
                 if yTem[1] == 2 then -- replace collision occupied(2) by empty space(1)
-                    newBrickType = 1
+                    newBrickType = 0
                 else
                     newBrickType = yTem[1]
                 end
