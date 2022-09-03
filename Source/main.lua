@@ -24,7 +24,7 @@ require("MenuViewModel")
 require("dataUtil")
 require("serialize")
 
-Debug = true
+Debug = false
 
 --- width/height in pixels of a single Gravity Express tile
 tileSize = 8
