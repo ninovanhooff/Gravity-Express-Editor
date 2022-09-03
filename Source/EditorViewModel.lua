@@ -345,7 +345,7 @@ end
 function checkX() --whether curX and camPos[1] are in bounds
     local editorSizeX = editorTilesX()
 
-    camPos[1] = lume.clamp(camPos[1], 1, levelProps.sizeX - editorSizeX)
+    camPos[1] = lume.clamp(camPos[1], 1, levelProps.sizeX - editorSizeX + 1)
 
     if curX<1 then curX=1 end
     if camPos[1]<1 then camPos[1]=1 end
@@ -360,7 +360,7 @@ end
 function checkY()
     local editorSizeY = editorTilesY()
 
-    camPos[2] = lume.clamp(camPos[2], 1, levelProps.sizeY - editorSizeY)
+    camPos[2] = lume.clamp(camPos[2], 1, levelProps.sizeY - editorSizeY + 1)
 
     if curY<1 then curY=1 end
     if camPos[2]<1 then camPos[2]=1 end
