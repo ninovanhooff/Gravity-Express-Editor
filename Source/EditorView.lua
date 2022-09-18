@@ -85,9 +85,10 @@ function renderLineHoriz(i,j, drawOffsetY)
     end
 end
 
-function drawBricks()
-    local endY = min(levelProps.sizeY, camPos[2]+editorTilesY())
-    for y = camPos[2], endY do
+function drawBricks(drawAll)
+    local startY = drawAll and 1 or camPos[2]
+    local endY = drawAll and levelProps.sizeY or min(levelProps.sizeY, camPos[2]+editorTilesY())
+    for y = startY, endY do
         renderLineHoriz(camPos[1], y, (y - camPos[2])*tileSize)
     end
 end

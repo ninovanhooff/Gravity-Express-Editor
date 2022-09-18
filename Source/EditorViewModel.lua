@@ -184,7 +184,8 @@ function EditorViewModel:keypressed(key)
             loadSprite("sprite_playdate.png")
         end
     elseif isDown("lgui", "rgui") and isDown("s") then
-        saveCompressedLevel(luaLevelDir .. self.fileName)
+        local basePath = luaLevelDir .. self.fileName
+        saveCompressedLevel(basePath)
     elseif isDown("lgui", "rgui") and isDown("p") then
         local testFileName = "temp"
         local absoluteLevelDir = love.filesystem.getRealDirectory(luaLevelDir) .. "/" .. luaLevelDir

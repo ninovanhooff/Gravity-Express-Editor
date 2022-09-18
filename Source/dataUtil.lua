@@ -4,6 +4,7 @@
 --- DateTime: 19/08/2022 22:30
 ---
 
+require("ImageWriter")
 
 local function optimizeEmptySpace()
     print("--- optimizing empty space")
@@ -113,9 +114,9 @@ function saveCompressedLevel(basePath)
         levelProps = levelProps,
         specialT = specialT
     })
-
+    writeImage(basePath)
     unOptimize() -- also un-condenses
-    editorStatusMsg = "Saved lua + compressed .bin file " .. basePath
+    editorStatusMsg = "Saved lua + compressed .bin file + image to " .. basePath
 end
 
 function saveUnCompressedLevel(luaFilePath)
@@ -156,16 +157,5 @@ function convertLevel(fileName)
     repairSpecials()
 
     saveCompressedLevel(luaLevelDir .. fileName)
-
-    -- IMAGE OUT
-
-    local canvas = love.graphics.newCanvas(levelProps.sizeX*tileSize,levelProps.sizeY*tileSize)
-    love.graphics.setCanvas(canvas)
-    --print("Frame-----")
-    drawSpecials(camPos)
-    drawBricks()
-    --print("---- numDraws", numDraws)
-    love.graphics.setCanvas()
-
-    canvas:newImageData():encode("png",fileName .. ".png")
+    writeImage(fileName)
 end
