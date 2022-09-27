@@ -8,6 +8,7 @@ require("ImageWriter")
 
 local function optimizeEmptySpace()
     print("--- optimizing empty space")
+    -- optimize columns
     for i=1,levelProps.sizeX do
         local lastBrickType = -1
         local lastJ = -1
@@ -30,10 +31,33 @@ local function optimizeEmptySpace()
                     lastBrickType=-1
                 end
             end
-
         end
     end
-    -- todo horizontal direction too? then maybe we need purely column / row based drawing. not the "fast" approach
+
+    --optimize rows
+    for j=1,levelProps.sizeY do
+        local lastBrickType = -1
+        local lastI = -1
+        for i=levelProps.sizeX,1,-1 do -- traverse row BACKWARDS
+            if lastBrickType == -1 and brickT[i][j][1] < 3 then
+                lastBrickType = brickT[i][j][1]
+            end
+            if brickT[i][j][1] == lastBrickType and i>1 and (lastI == -1 or lastI - i < 255) then -- empty space with max width of 254
+                if lastI ==-1 then
+                    lastI = i -- set END x of empty space
+                end
+            else -- always for i==1
+                if lastI ~=-1 then
+                    for k=i+1, lastI do
+                        brickT[k][j][2]= lastI - i -- w
+                        brickT[k][j][4]=k-(i+1) -- cur X sub index. 0-based
+                    end
+                    lastI =-1
+                    lastBrickType=-1
+                end
+            end
+        end
+    end
 end
 
 --- replace all non-cencrete bricks by 1x1 tiles, including empty space
