@@ -214,14 +214,22 @@ function EditorViewModel:keypressed(key)
         print(compileAndPlayCommand)
         os.execute(compileAndPlayCommand)
     elseif isDown("d") and isDown ("x") then
-        decreaseLevelSizeX()
-        editorStatusMsg = "Dereased X size to " .. levelProps.sizeX
+        if levelProps.sizeX > 50 then
+            decreaseLevelSizeX()
+            editorStatusMsg = "Dereased X size to " .. levelProps.sizeX
+        else
+            editorStatusMsg = "Can't decrease X size: minimum (50) reached"
+        end
     elseif isDown("i") and isDown("x") then
         increaseLevelSizeX()
         editorStatusMsg = "Increased X size to " .. levelProps.sizeX
     elseif isDown("d") and isDown ("y") then
-        decreaseLevelSizeY()
-        editorStatusMsg = "Dereased Y size to " .. levelProps.sizeY
+        if levelProps.sizeY > 28 then
+            decreaseLevelSizeY()
+            editorStatusMsg = "Dereased Y size to " .. levelProps.sizeY
+        else
+            editorStatusMsg = "Can't decrease Y size: minimum (28) reached"
+        end
     elseif isDown("i") and isDown("y") then
         increaseLevelSizeY()
         editorStatusMsg = "Increased Y size to " .. levelProps.sizeY
