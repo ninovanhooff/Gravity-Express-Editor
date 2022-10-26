@@ -18,7 +18,7 @@ function InitEditor()
 end
 
 function generateLevel(w, h)
-    levelProps = {fuel=6000,bg=0,sizeX=w,sizeY=h,tLimit=300,lives=5}
+    levelProps = {fuel=6000,bg=0,sizeX=w,sizeY=h,tLimit=300,lives=9}
     brickT = nil
     brickT = {}
     specialT = {}
