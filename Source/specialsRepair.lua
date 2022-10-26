@@ -322,11 +322,12 @@ local function repairBarrier(item)
         )
         if item.endStone == 1 then
             -- bottom endStone
-            fillBrickFromSample(
-                item.x, item.y + item.h,
-                item.x, item.y + item.h - 1,
-                2, 1
-            )
+            -- disabled because it adds an extra brick that sticks out when barrier is OK
+            --fillBrickFromSample(
+            --    item.x, item.y + item.h,
+            --    item.x, item.y + item.h - 1,
+            --    2, 1
+            --)
         end
     elseif direction == DIR_RIGHT then
         -- base
