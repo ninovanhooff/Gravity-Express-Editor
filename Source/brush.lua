@@ -38,6 +38,11 @@ function SquareBrush(w)
 end
 
 function CircleBrush(w) -- width
+    if w % 2 == 0 then
+        -- only uneven brushSize are supported
+        w = w + 1
+        brushSize = w
+    end
     local r = math.floor(w*0.5)
     local brushT = {}
     brushVerts = {}

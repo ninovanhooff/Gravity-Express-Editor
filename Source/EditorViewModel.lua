@@ -150,7 +150,6 @@ function EditorViewModel:wheelMoved(_,y)
         -- increase brush size
         if brushSize<30 and (selBrickType~=7 or brushSize<4) then
             brushSize = brushSize + 1
-            if BrushType == CircleBrush then brushSize = brushSize+1 end
             curBrush = BrushType(brushSize)
             if curX+brushSize>levelProps.sizeX then
                 curX = levelProps.sizeX-brushSize+1
