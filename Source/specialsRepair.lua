@@ -336,14 +336,14 @@ local function repairBarrier(item)
             item.x + 2, item.y + 6,
             2, 1
         )
-        if item.endStone == 1 then
-            -- bottom endStone
-            fillBrickFromSample(
-                item.x + item.w - 1, item.y + item.h,
-                item.x + item.w - 2, item.y + item.h - 1,
-                2, 1
-            )
-        end
+        --if item.endStone == 1 then
+        --    -- bottom endStone
+        --    fillBrickFromSample(
+        --        item.x + item.w - 1, item.y + item.h,
+        --        item.x + item.w - 2, item.y + item.h - 1,
+        --        2, 1
+        --    )
+        --end
     end
     setCollisionBarrier(item)
 end
